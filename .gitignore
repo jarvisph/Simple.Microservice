@@ -1,0 +1,10 @@
+/src/Authorization/Authorization.Application/bin
+/src/Authorization/Authorization.Application/obj
+/src/Authorization/Authorization.Caching/bin
+/src/Authorization/Authorization.Caching/obj
+/src/Authorization/Authorization.Domain/obj
+/src/Authorization/Authorization.Domain/bin
+/src/Authorization/Authorization.Model/obj
+/src/Authorization/Authorization.Model/bin
+/src/Authorization/Web.Authorization.Admin/bin
+/src/Authorization/Web.Authorization.Admin/obj
