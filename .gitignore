@@ -9,3 +9,5 @@
 /src/Authorization/Web.Authorization.Admin/bin
 /src/Authorization/Web.Authorization.Admin/obj
 /.vs
+/src/Simple.Authorization/bin
+/src/Simple.Authorization/obj
