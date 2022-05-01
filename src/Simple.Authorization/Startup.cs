@@ -65,7 +65,7 @@ namespace Simple.Authorization
                               Reference = new OpenApiReference
                               {
                                   Type = ReferenceType.SecurityScheme,
-                                  Id = "Bearer"
+                                  Id = "Bearer",
                               }
                           },
                          new string[] {}

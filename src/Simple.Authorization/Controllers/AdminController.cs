@@ -1,13 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Simple.Authorization.Domain.Services;
 using Simple.Authorization.Entity;
 using Simple.Authorization.Model.Admin;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Simple.Core.Extensions;
+using Simple.Web.Mvc;
 
 namespace Simple.Authorization.Controllers
 {
@@ -22,10 +18,12 @@ namespace Simple.Authorization.Controllers
         /// 管理员列表
         /// </summary>
         /// <returns></returns>
-        [HttpGet]
-        public ActionResult List()
+        [HttpPost]
+        public ActionResult List([FromForm] string? adminname, [FromForm] string? nickname)
         {
-            return PageResult(DB.Admin.OrderByDescending(c => c.CreateAt), c => new
+            var query = DB.Admin.Where(adminname, c => c.AdminName == adminname)
+                                .Where(nickname, c => c.NickName == nickname);
+            return PageResult(query.OrderByDescending(c => c.CreateAt), c => new
             {
                 c.ID,
                 c.AdminName,
@@ -42,7 +40,7 @@ namespace Simple.Authorization.Controllers
         /// <param name="input"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult Save([FromForm] AdminInput input)
+        public ActionResult Save([FromModel] AdminInput input)
         {
             if (input.ID == 0)
             {

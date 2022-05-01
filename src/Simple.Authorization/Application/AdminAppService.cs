@@ -10,6 +10,8 @@ using Simple.Web.Jwt;
 using Simple.Core.Extensions;
 using System.Security.Claims;
 using System.Data;
+using Simple.Core.Authorization;
+using Simple.Authorization.Domain.Auth;
 
 namespace Simple.Authorization.Application
 {
@@ -42,29 +44,47 @@ namespace Simple.Authorization.Application
         }
         public bool Login(string username, string password, out string token)
         {
+            if (!CheckHelper.CheckUserName(username, out string msg)) throw new MessageException(msg);
+            if (!CheckHelper.CheckPassword(password, out msg)) throw new MessageException(msg);
             using (IDapperDatabase db = CreateDatabase())
             {
-                Admin admin = db.FirstOrDefault<Admin>(c => c.AdminName == username);
-                if (admin == null) throw new MessageException("登录名不存在");
-                if (admin.Status != UserStatus.Normal) throw new MessageException("管理员状态有误，请联系超级管理员");
-                if (admin.Password != PwdEncryption.Encryption(password))
+                token = password;
+                if (!db.Any<Admin>())
                 {
-                    int error = PasswordErrorCount(admin.ID);
-                    if (error > 5)
+                    long timestamp = DateTime.Now.GetTimestamp();
+                    db.Insert(new Admin
                     {
-                        throw new MessageException("密码错误超过5次，账号已被锁定，请联系超级管理员");
-                    }
-                    else
-                    {
-                        throw new MessageException("密码错误");
-                    }
+                        AdminName = username,
+                        CreateAt = timestamp,
+                        NickName = "超级管理员",
+                        Password = PwdEncryption.Encryption(password, timestamp),
+                        IsAdmin = true
+                    });
                 }
-                admin.LoginAt = DateTime.Now;
-                db.Update(admin, c => c.ID == admin.ID, c => c.LoginAt);
-                var claims = new[] {
-                    new Claim(nameof(admin.ID), admin.ID.ToString()),
-                };
-                token = JWTHelper.CreateToken(_options, claims);
+                else
+                {
+                    Admin admin = db.FirstOrDefault<Admin>(c => c.AdminName == username);
+                    if (admin == null) throw new MessageException("登录名不存在");
+                    if (admin.Status != UserStatus.Normal) throw new MessageException("管理员状态有误，请联系超级管理员");
+                    if (admin.Password != PwdEncryption.Encryption(password, admin.CreateAt))
+                    {
+                        int error = PasswordErrorCount(admin.ID);
+                        if (error > 5)
+                        {
+                            throw new MessageException("密码错误超过5次，账号已被锁定，请联系超级管理员");
+                        }
+                        else
+                        {
+                            throw new MessageException("密码错误");
+                        }
+                    }
+                    admin.LoginAt = DateTime.Now.GetTimestamp();
+                    db.Update(admin, c => c.ID == admin.ID, c => c.LoginAt);
+                    var claims = new[] {
+                                       new Claim(nameof(admin.ID), admin.ID.ToString()),
+                                      };
+                    token = JWTHelper.CreateToken(_options, claims);
+                }
             }
             return Logger.Log($"登录成功");
         }
@@ -75,13 +95,13 @@ namespace Simple.Authorization.Application
                 throw new MessageException(msg);
             using (IDapperDatabase db = CreateDatabase())
             {
-                DateTime time = DateTime.Now;
+                long timestamp = DateTime.Now.GetTimestamp();
                 password = PwdEncryption.RandomPassword();
                 db.Insert(new Admin()
                 {
                     AdminName = input.AdminName,
-                    CreateAt = time,
-                    Password = PwdEncryption.Encryption(password, time.GetTimestamp().ToString()),
+                    CreateAt = timestamp,
+                    Password = PwdEncryption.Encryption(password, timestamp),
                     NickName = input.NickName,
                     Status = UserStatus.Normal
                 });
@@ -101,7 +121,7 @@ namespace Simple.Authorization.Application
                 Admin admin = db.FirstOrDefault<Admin>(c => c.ID == adminId);
                 if (admin == null) throw new MessageException($"管理员不存在");
                 password = PwdEncryption.RandomPassword();
-                admin.Password = PwdEncryption.Encryption(password, admin.CreateAt.GetTimestamp().ToString());
+                admin.Password = PwdEncryption.Encryption(password, admin.CreateAt);
                 db.Update(admin, c => c.ID == admin.ID, c => c.Password);
             }
             return Logger.Log($"重置管理员密码");
@@ -113,8 +133,8 @@ namespace Simple.Authorization.Application
             {
                 Admin admin = db.FirstOrDefault<Admin>(c => c.ID == adminId);
                 if (admin == null) throw new MessageException($"管理员不存在");
-                if (admin.Password != PwdEncryption.Encryption(oldpassword, admin.CreateAt.GetTimestamp().ToString())) throw new MessageException($"旧密码错误");
-                admin.Password = PwdEncryption.Encryption(newpassword, admin.CreateAt.GetTimestamp().ToString());
+                if (admin.Password != PwdEncryption.Encryption(oldpassword, admin.CreateAt)) throw new MessageException($"旧密码错误");
+                admin.Password = PwdEncryption.Encryption(newpassword, admin.CreateAt);
                 db.Update(admin, c => c.ID == adminId, c => c.Password);
             }
             return Logger.Log($"修改密码");

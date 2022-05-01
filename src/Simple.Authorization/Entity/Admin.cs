@@ -15,16 +15,20 @@ namespace Simple.Authorization.Entity
     /// 管理员表
     /// </summary>
     [Table("auth_Admin")]
-    public class Admin : AdminBase, IEntity
+    public class Admin : IEntity
     {
         [Column("AdminID"), Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public override int ID { get; set; }
-        public override string AdminName { get; set; } = string.Empty;
-        public override string NickName { get; set; } = string.Empty;
+        public int ID { get; set; }
+        public string AdminName { get; set; } = string.Empty;
+        public string NickName { get; set; } = string.Empty;
         /// <summary>
         /// 密码
         /// </summary>
         public string Password { get; set; } = string.Empty;
+        /// <summary>
+        /// 权限
+        /// </summary>
+        public string Permission { get; set; } = string.Empty;
         /// <summary>
         /// 状态
         /// </summary>
@@ -36,11 +40,15 @@ namespace Simple.Authorization.Entity
         /// <summary>
         /// 最后一次登录时间
         /// </summary>
-        public DateTime LoginAt { get; set; }
+        public long LoginAt { get; set; }
         /// <summary>
         /// 创建时间
         /// </summary>
-        public DateTime CreateAt { get; set; }
+        public long CreateAt { get; set; }
+        /// <summary>
+        /// 是否超级管理员
+        /// </summary>
+        public bool IsAdmin { get; set; }
 
     }
 }

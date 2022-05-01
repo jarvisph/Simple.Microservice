@@ -9,16 +9,15 @@ using Simple.Core.Extensions;
 using Simple.Web.Jwt;
 using System.Security.Claims;
 using Simple.Authorization.Domain.Services;
+using Microsoft.OpenApi.Models;
 
 namespace Simple.Authorization.Controllers
 {
     public class AccountController : AuthorizationControllerBase
     {
-        private readonly JWTOption _options;
         private readonly IAdminAppService _adminAppService;
-        public AccountController(JWTOption option, IAdminAppService adminAppService)
+        public AccountController(IAdminAppService adminAppService)
         {
-            _options = option;
             _adminAppService = adminAppService;
         }
         /// <summary>
