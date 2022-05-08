@@ -11,3 +11,8 @@
 /.vs
 /src/Simple.Authorization/bin
 /src/Simple.Authorization/obj
+/test/Simple.SignalR.Test/bin
+/test/Simple.SignalR.Test/obj
+/src/Simple.SignalR/obj
+/src/Simple.SignalR/bin
+/src/Simple.SignalR/wwwroot/node_modules
