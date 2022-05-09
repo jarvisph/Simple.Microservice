@@ -9,12 +9,17 @@ using System.Threading.Tasks;
 
 namespace Simple.SignalR.Queues
 {
+    [Producer(ExchangeName.ConnectionHub)]
     public class ConnectionQueue : IMessageQueue
     {
+        public ConnectionQueue()
+        {
+
+        }
         public ConnectionQueue(string connectionId, HttpContext? context)
         {
             this.ConnectionId = connectionId;
-            this.Key = context.GetHeader("appkey");
+            this.AppKey = context.GetHeader("appkey").ToString().GetValue<Guid>();
             this.IP = context.GetIp();
             this.Content = context.GetRequestInfo();
             this.CreateAt = DateTime.Now;
@@ -34,7 +39,7 @@ namespace Simple.SignalR.Queues
         /// <summary>
         /// 连接Key
         /// </summary>
-        public string Key { get; set; }
+        public Guid AppKey { get; set; }
         /// <summary>
         /// 内容
         /// </summary>

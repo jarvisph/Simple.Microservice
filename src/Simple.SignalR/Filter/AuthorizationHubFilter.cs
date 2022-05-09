@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Simple.Core.Authorization;
 using Simple.Core.Extensions;
+using Simple.SignalR.Domain.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,16 +16,18 @@ namespace Simple.SignalR.Filter
     /// </summary>
     public class AuthorizationHubFilter : IHubFilter
     {
+        private readonly IConnectionAppService _connectionAppService;
+        public AuthorizationHubFilter(IConnectionAppService connectionAppService)
+        {
+            _connectionAppService = connectionAppService;
+        }
         public Task OnConnectedAsync(HubLifetimeContext context, Func<HubLifetimeContext, Task> next)
         {
             HttpContext? httpcontext = context.Context.GetHttpContext();
             if (httpcontext == null) throw new AuthorizationException();
             string appKey = httpcontext.GetHeader("appkey");
-            if (string.IsNullOrWhiteSpace(appKey))
-            {
-                Console.WriteLine("授权失败");
-                throw new AuthorizationException();
-            }
+            if (!Guid.TryParse(appKey, out _)) throw new AuthorizationException("未知应用");
+            if (!_connectionAppService.CheckAppKey(appKey.GetValue<Guid>())) throw new AuthorizationException("授权失败");
             else
             {
                 Console.WriteLine($"授权成功：{appKey}");

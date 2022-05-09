@@ -1,6 +1,6 @@
 const signalR = require("@microsoft/signalr")
 const chanenl = "TEST";
-const token = "a123456";
+const token = "9559612CE51E402F8A6C1426F5A48E22";
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("http://localhost:5000/hub", {
         headers: {

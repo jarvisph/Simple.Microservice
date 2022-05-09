@@ -22,7 +22,7 @@ namespace Simple.SignalR.Hubs
         /// <returns></returns>
         public override async Task OnConnectedAsync()
         {
-            new ConnectionQueue(Context.ConnectionId, Context.GetHttpContext());
+            new ConnectionQueue(Context.ConnectionId, Context.GetHttpContext()).Send();
             await base.OnConnectedAsync();
         }
 
@@ -33,6 +33,7 @@ namespace Simple.SignalR.Hubs
         /// <returns></returns>
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
+            new ConnectionQueue(Context.ConnectionId, Context.GetHttpContext()).Send();
             await base.OnDisconnectedAsync(exception);
         }
         /// <summary>
@@ -46,7 +47,7 @@ namespace Simple.SignalR.Hubs
             HttpContext? context = Context.GetHttpContext();
             string appkey = context.GetHeader("appkey");
             Console.WriteLine($"发送成功=>频道：{channel}，appKey=>{appkey}");
-            new PushMessageQueue(Context.ConnectionId, channel, message, appkey);
+            new PushLogQueue(Context.ConnectionId, channel, message, appkey).Send();
             await Clients.All.SendAsync(channel, message);
         }
 

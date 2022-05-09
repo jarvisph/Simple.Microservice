@@ -6,13 +6,13 @@ using Simple.SignalR.Queues;
 
 namespace Simple.SignalR.Consumers
 {
-    [Consumer(ExchangeName.ConnectionHub)]
-    public class ConnectionConsumer : RabbitConsumerBase<ConnectionQueue>
+    [Consumer(ExchangeName.PushLog)]
+    public class PushLogConsumer : RabbitConsumerBase<PushLogQueue>
     {
         private readonly IConnectionAppService _connectionAppService = IocCollection.Resolve<IConnectionAppService>();
-        public override void Invoke(ConnectionQueue message, object sender, BasicDeliverEventArgs args)
+        public override void Invoke(PushLogQueue message, object sender, BasicDeliverEventArgs args)
         {
-            _connectionAppService.SaveConnectionInfo(message);
+            _connectionAppService.SavePushLog(message);
         }
     }
 }

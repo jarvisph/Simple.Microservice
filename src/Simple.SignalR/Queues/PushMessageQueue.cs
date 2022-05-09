@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Simple.RabbitMQ;
+﻿using Simple.RabbitMQ;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,24 +7,31 @@ using System.Threading.Tasks;
 
 namespace Simple.SignalR.Queues
 {
+    /// <summary>
+    /// 推送消息体
+    /// </summary>
+    [Producer(ExchangeName.PushMessage)]
     public class PushMessageQueue : IMessageQueue
     {
-        public PushMessageQueue(string connectionId, string chanenl, string message, string appkey)
+        public PushMessageQueue()
         {
-            this.ConnectionId = connectionId;
-            this.Channel = chanenl;
-            this.Key = appkey;
+
+        }
+        public PushMessageQueue(string appKey, string chanenl, string message)
+        {
+            this.AppKey = appKey;
+            this.Chanenl = chanenl;
             this.Message = message;
-            this.CreateAt = DateTime.Now;
         }
         /// <summary>
         /// 频道
         /// </summary>
-        public string Channel { get; set; }
-        public string Key { get; set; }
-        public string ConnectionId { get; set; }
-        public string Message { get; set; }
-        public DateTime CreateAt { get; set; }
+        public string Chanenl { get; set; } = string.Empty;
+        public string AppKey { get; set; } = string.Empty;
+        /// <summary>
+        /// 消息体
+        /// </summary>
+        public string Message { get; set; } = string.Empty;
         public int ErrorCount { get; set; }
     }
 }
