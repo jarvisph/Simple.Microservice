@@ -11,8 +11,7 @@ namespace Simple.SignalR.Consumers
     {
         public override void Invoke(PushMessageQueue message, object sender, BasicDeliverEventArgs args)
         {
-            HubConnection connection = SignalRConnection.GetHubConnection(message.AppKey);
-            connection.InvokeAsync("SendMessage", message.Chanenl, message.Message).ConfigureAwait(false);
+            SignalRConnection.Send(message);
         }
     }
 }
