@@ -30,7 +30,7 @@ namespace Simple.SignalR
         {
             services.AddSimple();
             services.AddSqlServerProvider();
-            services.AddSingleton(c => new RabbitOption(AppsettingConfig.GetConnectionString("RabbitConnection")));
+            services.AddSingleton(c => new RabbitOption(Configuration.GetConnectionString("RabbitConnection")));
             services.AddSignalR(options =>
             {
                 options.AddFilter<AuthorizationHubFilter>();

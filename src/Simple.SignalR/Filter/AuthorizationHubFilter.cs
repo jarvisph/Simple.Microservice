@@ -16,8 +16,8 @@ namespace Simple.SignalR.Filter
     /// </summary>
     public class AuthorizationHubFilter : IHubFilter
     {
-        private readonly IConnectionAppService _connectionAppService;
-        public AuthorizationHubFilter(IConnectionAppService connectionAppService)
+        private readonly ISignalRAppService _connectionAppService;
+        public AuthorizationHubFilter(ISignalRAppService connectionAppService)
         {
             _connectionAppService = connectionAppService;
         }

@@ -9,7 +9,7 @@ namespace Simple.SignalR.Consumers
     [Consumer(ExchangeName.PushLog)]
     public class PushLogConsumer : RabbitConsumerBase<PushLogQueue>
     {
-        private readonly IConnectionAppService _connectionAppService = IocCollection.Resolve<IConnectionAppService>();
+        private readonly ISignalRAppService _connectionAppService = IocCollection.Resolve<ISignalRAppService>();
         public override void Invoke(PushLogQueue message, object sender, BasicDeliverEventArgs args)
         {
             _connectionAppService.SavePushLog(message);

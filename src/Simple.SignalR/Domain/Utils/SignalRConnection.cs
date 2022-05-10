@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
+using Simple.Core.Localization;
 using Simple.SignalR.Queues;
 using System;
 using System.Collections.Generic;
@@ -20,8 +21,9 @@ namespace Simple.SignalR.Domain.Utils
             }
             else
             {
+                string connnection = AppsettingConfig.GetConnectionString("SignalRConnection");
                 connection = new HubConnectionBuilder()
-                         .WithUrl("http://localhost:5000/hub", options =>
+                         .WithUrl($"{connnection}/hub", options =>
                          {
                              options.Headers = new Dictionary<string, string>
                             {

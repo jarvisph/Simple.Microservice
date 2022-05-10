@@ -15,7 +15,7 @@ using System.Data;
 
 namespace Simple.SignalR.Application
 {
-    public class SignalRAppServiceBase : AppServiceBase, IConnectionAppService
+    public class SignalRAppServiceBase : AppServiceBase, ISignalRAppService
     {
         public SignalRAppServiceBase() : base(AppsettingConfig.GetConnectionString("DbConnection"))
         {

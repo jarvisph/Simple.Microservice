@@ -14,8 +14,8 @@ namespace Simple.SignalR.Controllers
     public class SignalRController : SimpleControllerBase
     {
         private readonly SignalRDbContext _context;
-        private readonly IConnectionAppService _connectionAppService;
-        public SignalRController(SignalRDbContext context, IConnectionAppService connectionAppService)
+        private readonly ISignalRAppService _connectionAppService;
+        public SignalRController(SignalRDbContext context, ISignalRAppService connectionAppService)
         {
             this._context = context;
             this._connectionAppService = connectionAppService;

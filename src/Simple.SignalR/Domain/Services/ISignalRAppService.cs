@@ -8,7 +8,7 @@ using Simple.SignalR.Queues;
 
 namespace Simple.SignalR.Domain.Services
 {
-    public interface IConnectionAppService : ISingletonDependency
+    public interface ISignalRAppService : ISingletonDependency
     {
         /// <summary>
         /// 保存连接信息

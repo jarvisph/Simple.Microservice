@@ -9,7 +9,7 @@ namespace Simple.SignalR.Consumers
     [Consumer(ExchangeName.ConnectionHub)]
     public class ConnectionConsumer : RabbitConsumerBase<ConnectionQueue>
     {
-        private readonly IConnectionAppService _connectionAppService = IocCollection.Resolve<IConnectionAppService>();
+        private readonly ISignalRAppService _connectionAppService = IocCollection.Resolve<ISignalRAppService>();
         public override void Invoke(ConnectionQueue message, object sender, BasicDeliverEventArgs args)
         {
             _connectionAppService.SaveConnectionInfo(message);
