@@ -1,20 +1,14 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
-using Simple.SignalR.Hubs;
-using Simple.Web.Extensions;
-using Simple.SignalR.Filter;
-using Simple.SignalR.Domain.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Simple.Core.Data;
 using Simple.RabbitMQ;
-using Simple.Core.Localization;
+using Simple.SignalR.Domain.DbContext;
+using Simple.SignalR.Filter;
+using Simple.SignalR.Hubs;
+using Simple.Web.Extensions;
 
 namespace Simple.SignalR
 {

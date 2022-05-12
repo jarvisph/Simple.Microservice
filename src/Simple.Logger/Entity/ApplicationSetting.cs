@@ -1,20 +1,23 @@
 ﻿using Simple.Core.Data.Schema;
 using Simple.Core.Domain.Enums;
-using System.ComponentModel.DataAnnotations;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Simple.SignalR.Entity
+namespace Simple.Logger.Entity
 {
     /// <summary>
-    /// 应用配置
+    /// 应用
     /// </summary>
-    [Table("hub_Application")]
+    [Table("log_Appsetting")]
     public class ApplicationSetting : IEntity
     {
         /// <summary>
-        /// 应用ID
+        /// 秘钥
         /// </summary>
-        [Key]
         public Guid AppKey { get; set; }
         /// <summary>
         /// 应用名称
@@ -26,7 +29,7 @@ namespace Simple.SignalR.Entity
         /// </summary>
         public DateTime CreateAt { get; set; }
         /// <summary>
-        /// 应用状态
+        /// 状态
         /// </summary>
         public UserStatus Status { get; set; }
     }

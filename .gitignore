@@ -16,3 +16,5 @@
 /src/Simple.SignalR/obj
 /src/Simple.SignalR/bin
 /src/Simple.SignalR/wwwroot/node_modules
+/src/Simple.Logger/obj
+/src/Simple.Logger/bin
