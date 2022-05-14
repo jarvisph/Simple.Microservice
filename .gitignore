@@ -18,3 +18,8 @@
 /src/Simple.SignalR/wwwroot/node_modules
 /src/Simple.Logger/obj
 /src/Simple.Logger/bin
+/test/Simple.Utils.Test/obj
+/test/Simple.Utils.Test/bin
+/src/Simple.Utils/Job
+/src/Simple.Utils/bin
+/src/Simple.Utils/obj
