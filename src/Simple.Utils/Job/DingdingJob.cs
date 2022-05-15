@@ -64,7 +64,7 @@ namespace Simple.Utils.Job
                                 {
                                     title = msg.Title,
                                     text = msg.Text,
-                                    btnOrientation = 0,
+                                    btnOrientation = msg.BtnOrientation,
                                 }
                             };
                             break;
