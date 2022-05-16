@@ -12,11 +12,6 @@ using Simple.Core.Http;
 using Simple.Web.Extensions;
 using Simple.Web.Jwt;
 using Simple.Web.Swagger;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Simple.Authorization
 {
@@ -31,14 +26,13 @@ namespace Simple.Authorization
 
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddControllers(options =>
             {
                 options.Filters.Add<AuthorizationFilter>();
             });
             services.AddSimple();
             services.AddSqlServerProvider();
-            services.AddSingleton(t => new JWTOption("Simple.Authorization", "Simple.Authorization", "Simple.Authorization", TimeSpan.FromHours(10)));
+            services.AddJwt(Configuration.GetConnectionString("JwtConnection"));
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo

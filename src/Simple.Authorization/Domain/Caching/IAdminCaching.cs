@@ -9,6 +9,6 @@ namespace Simple.Authorization.Domain.Caching
 {
     internal interface IAdminCaching : ISingletonDependency
     {
-        
+        public IEnumerable<string> GetPermission(int adminId);
     }
 }

@@ -25,3 +25,5 @@
 /src/Simple.Utils/obj
 /src/Simple.Translate/obj
 /src/Simple.Translate/bin
+/web/Web.Admin/node_modules
+/web

@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Simple.dotNet\src\Simple.dotNet.Redis\Simple.dotNet.Redis.csproj" />
     <ProjectReference Include="..\..\..\Simple.dotNet\src\Simple.dotNet.Web\Simple.dotNet.Web.csproj" />
   </ItemGroup>
 
@@ -15,10 +16,6 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Model\View\" />
   </ItemGroup>
 
 </Project>

@@ -1,15 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Simple.Core.Extensions;
-using Simple.Web.Jwt;
-using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Simple.Authorization.Domain.Auth;
 using Simple.Authorization.Domain.Services;
-using Microsoft.OpenApi.Models;
+using Simple.Core.Authorization;
+using Simple.Core.Extensions;
 
 namespace Simple.Authorization.Controllers
 {
@@ -42,6 +36,16 @@ namespace Simple.Authorization.Controllers
             {
                 UserID = HttpContext.GetClaimValue("ID"),
             });
+        }
+        /// <summary>
+        /// 菜单
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult Menu()
+        {
+            string[] permissions = PermissionFinder.GetPermission(typeof(PermissionNames)).ToArray();
+            return JsonResult(PermissionFinder.GetMemu(permissions, new PermissionProvider()));
         }
         /// <summary>
         /// 登出

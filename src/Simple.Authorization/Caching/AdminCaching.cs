@@ -7,8 +7,11 @@ using System.Threading.Tasks;
 
 namespace Simple.Authorization.Caching
 {
-    internal class AdminCaching : IAdminCaching
+    internal class AdminCaching : AuthorizationCacheBase, IAdminCaching
     {
-
+        public IEnumerable<string> GetPermission(int adminId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
