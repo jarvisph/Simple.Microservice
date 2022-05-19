@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Simple.Core.Domain.Enums;
 using Simple.Core.Extensions;
 using Simple.Core.Languages;
+using Simple.Core.Logger;
 using Simple.Translate.Domain.DBContext;
 using Simple.Translate.Domain.Services;
 using Simple.Web.Mvc;
@@ -35,7 +36,7 @@ namespace Simple.Translate.Controllers
         /// <param name="content"></param>
         /// <param name="channel"></param>
         /// <returns>lanauge=chn&content=~你好~&channel=000000</returns>
-        [HttpPost, AllowAnonymous]
+        [HttpGet, AllowAnonymous]
         public ActionResult Text([FromQuery] LanguageType language, [FromQuery] string content, [FromQuery] string channel)
         {
             return JsonResult(_translateAppService.Translate(content, channel.GetValue<Guid>(), language));
@@ -44,17 +45,19 @@ namespace Simple.Translate.Controllers
         /// <summary>
         /// 文件翻译
         /// </summary>
-        /// <param name="file"></param>
         /// <param name="language"></param>
         /// <param name="channel"></param>
         /// <returns></returns>
         [HttpPost, AllowAnonymous]
-        public FileContentResult File([FromForm] IFormFile file, [FromForm] LanguageType language, [FromForm] string channel)
+        public FileContentResult File([FromForm] LanguageType language, [FromForm] string channel)
         {
+            if (HttpContext.Request.Form.Files.Count == 0) throw new MessageException("请上传文件");
+            IFormFile file = HttpContext.Request.Form.Files[0];
             byte[] data = file.GetData();
             string fileExt = file.GetFileExt();
+            ContentType contentType = fileExt.ToUpper().ToEnum<ContentType>();
             var content = _translateAppService.Translate(data, channel.GetValue<Guid>(), language);
-            return new FileContentResult(content, fileExt);
+            return File(content, contentType.GetDescription(), file.FileName);
         }
 
         /// <summary>
@@ -64,7 +67,7 @@ namespace Simple.Translate.Controllers
         /// <param name="name"></param>
         /// <param name="status"></param>
         /// <returns></returns>
-        [HttpPost("channel/list")]
+        [HttpPost, ActionName("channel/list")]
         public ActionResult Channel_List([FromForm] Guid? channel, [FromForm] string name, [FromForm] UserStatus? status)
         {
             var query = _context.TranslateChannel.Where(channel, c => c.Channel == channel)
@@ -83,7 +86,7 @@ namespace Simple.Translate.Controllers
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        [HttpPost("channel/create")]
+        [HttpPost, ActionName("channel/create")]
         public ActionResult Channel_Create([FromForm] string name)
         {
             return JsonResult(_translateAppService.CreateChannel(name));
@@ -94,12 +97,13 @@ namespace Simple.Translate.Controllers
         /// </summary>
         /// <param name="channel"></param>
         /// <returns></returns>
-        [HttpPost("content/list")]
+        [HttpPost, ActionName("content/list")]
         public ActionResult Content_List([FromForm] Guid? channel)
         {
             var query = _context.TranslateContent.Where(channel, c => c.Channel == channel);
             return PageResult(query.OrderByDescending(c => c.Word), c => new
             {
+                c.Word,
                 c.Channel,
                 c.Translate
             });
@@ -112,7 +116,7 @@ namespace Simple.Translate.Controllers
         /// <param name="language"></param>
         /// <param name="content"></param>
         /// <returns></returns>
-        [HttpPost("content/save")]
+        [HttpPost, ActionName("content/save")]
         public ActionResult Content_Save([FromForm] Guid channel, [FromForm] long word, [FromForm] LanguageType language, [FromForm] string content)
         {
             return JsonResult(_translateAppService.SaveContent(channel, word, language, content));

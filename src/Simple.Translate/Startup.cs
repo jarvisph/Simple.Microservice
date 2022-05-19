@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Simple.Core.Data;
 using Simple.Translate.Domain.DBContext;
 using Simple.Translate.Domain.Fitler;
 using Simple.Web.Extensions;
@@ -23,6 +24,7 @@ namespace Simple.Translate
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSimple();
+            services.AddSqlServerProvider();
             services.AddControllers(options =>
             {
                 options.Filters.Add<AuthorizationFilter>();

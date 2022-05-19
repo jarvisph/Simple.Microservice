@@ -5,6 +5,7 @@ using Simple.Core.Domain.Enums;
 using Simple.Core.Encryption;
 using Simple.Core.Helper;
 using Simple.Core.Languages;
+using Simple.Core.Localization;
 using Simple.Core.Logger;
 using Simple.Translate.Domain.Services;
 using Simple.Translate.Entity;
@@ -16,6 +17,10 @@ namespace Simple.Translate.Application
 {
     public class TranslateAppService : AppServiceBase, ITranslateAppService
     {
+        public TranslateAppService() : base(AppsettingConfig.GetConnectionString("DbConnection"))
+        {
+
+        }
         private long GetKey(string word)
         {
             word = word.Replace("~", "");
@@ -45,12 +50,13 @@ namespace Simple.Translate.Application
             using (IDapperDatabase db = CreateDatabase(IsolationLevel.ReadUncommitted))
             {
                 TranslateContent text = db.FirstOrDefault<TranslateContent>(c => c.Channel == channel && c.Word == key);
-                if (text == null || !text.Translate.ContainsKey(language))
+                Dictionary<LanguageType, string> translate = text == null ? new Dictionary<LanguageType, string>() : text.Translate;
+                if (text == null || !translate.ContainsKey(language))
                 {
                     text ??= new TranslateContent();
                     string content = db.FirstOrDefault<TranslateWord, string>(c => c.Word == key && c.Language == language, c => c.Content);
-                    content = word.Replace("~", "");
-                    text.Translate[LanguageType.CHN] = content;
+                    translate[LanguageType.CHN] = word.Replace("~", "");
+                    translate[language] = content;
                     if (string.IsNullOrWhiteSpace(content))
                     {
                         if (!db.Any<TranslateWord>(c => c.Word == key && c.Language == LanguageType.CHN))
@@ -63,8 +69,8 @@ namespace Simple.Translate.Application
                                 Word = key
                             });
                         }
-                        content = Online(LanguageType.CHN, language, content);
-                        text.Translate[language] = content;
+                        content = Online(LanguageType.CHN, language, word.Replace("~", ""));
+                        translate[language] = content;
                         if (db.Any<TranslateWord>(c => c.Word == key && c.Language == language))
                         {
                             db.Update<TranslateWord, string>(c => c.Word == key && c.Language == language, c => c.Content, content);
@@ -81,7 +87,7 @@ namespace Simple.Translate.Application
                         }
 
                     }
-                    text.Content = JsonConvert.SerializeObject(text.Translate);
+                    text.Content = JsonConvert.SerializeObject(translate);
                     if (db.Any<TranslateContent>(c => c.Word == key && c.Channel == channel))
                     {
                         db.Update(text, c => c.Word == key && c.Channel == channel, c => c.Content);
@@ -94,7 +100,7 @@ namespace Simple.Translate.Application
                     }
                 }
                 db.Commit();
-                return text.Translate.GetValueOrDefault(language, string.Empty);
+                return translate.GetValueOrDefault(language, string.Empty);
             }
         }
 
@@ -109,7 +115,7 @@ namespace Simple.Translate.Application
                 foreach (Match match in matchs)
                 {
                     string text = Translate(match.Value, channel, language);
-                    content.Replace(match.Value, text);
+                    content = content.Replace(match.Value, text);
                 }
             }
             return Encoding.UTF8.GetBytes(content);
@@ -159,19 +165,20 @@ namespace Simple.Translate.Application
                     });
                 }
                 TranslateContent text = db.FirstOrDefault<TranslateContent>(c => c.Channel == channel && c.Word == word);
+                Dictionary<LanguageType, string> translate = text == null ? new Dictionary<LanguageType, string>() : text.Translate;
                 if (text == null)
                 {
                     text ??= new TranslateContent();
                     text.Word = word;
                     text.Channel = channel;
-                    text.Translate[language] = content;
-                    text.Content = JsonConvert.SerializeObject(text.Translate);
+                    translate[language] = content;
+                    text.Content = JsonConvert.SerializeObject(translate);
                     db.Insert(text);
                 }
                 else
                 {
-                    text.Translate[language] = content;
-                    text.Content = JsonConvert.SerializeObject(text.Translate);
+                    translate[language] = content;
+                    text.Content = JsonConvert.SerializeObject(translate);
                     db.Update(text, c => c.Channel == channel && c.Word == word, t => t.Content);
                 }
                 db.Commit();
