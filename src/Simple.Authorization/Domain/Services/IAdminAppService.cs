@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Simple.Authorization.Model.Admin;
+﻿using Simple.Authorization.Model.Admin;
 using Simple.Core.Dependency;
 
 namespace Simple.Authorization.Domain.Services
@@ -17,7 +12,7 @@ namespace Simple.Authorization.Domain.Services
         /// <param name="password"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public bool Login(string username, string password, out string token);
+        public bool Login(string username, string password, long time, string code, out string token);
         /// <summary>
         /// 创建管理员
         /// </summary>

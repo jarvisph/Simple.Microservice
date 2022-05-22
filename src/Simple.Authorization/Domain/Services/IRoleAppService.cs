@@ -29,6 +29,5 @@ namespace Simple.Authorization.Domain.Services
         /// <param name="permssions"></param>
         /// <returns></returns>
         bool Authorize(int roleId, string[] permssions);
-
     }
 }

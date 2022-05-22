@@ -19,16 +19,22 @@ namespace Simple.Authorization.Entity
     {
         [Column("AdminID"), Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
+        /// <summary>
+        /// 管理员名称
+        /// </summary>
         public string AdminName { get; set; } = string.Empty;
+        /// <summary>
+        /// 昵称
+        /// </summary>
         public string NickName { get; set; } = string.Empty;
         /// <summary>
         /// 密码
         /// </summary>
         public string Password { get; set; } = string.Empty;
         /// <summary>
-        /// 权限
+        /// 角色ID
         /// </summary>
-        public string Permission { get; set; } = string.Empty;
+        public int RoleID { get; set; }
         /// <summary>
         /// 状态
         /// </summary>

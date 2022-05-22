@@ -21,9 +21,9 @@ namespace Simple.Authorization.Controllers
         /// <param name="password"></param>
         /// <returns></returns>
         [HttpPost, AllowAnonymous]
-        public ActionResult Login([FromForm] string username, [FromForm] string password)
+        public ActionResult Login([FromForm] string username, [FromForm] string password, [FromForm] long time, [FromForm] string code)
         {
-            return JsonResult(_adminAppService.Login(username, password, out string token), new { access_token = token });
+            return JsonResult(_adminAppService.Login(username, password, time, code, out string token), new { access_token = token });
         }
         /// <summary>
         /// 登录信息

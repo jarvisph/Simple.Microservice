@@ -24,6 +24,10 @@ namespace Simple.Authorization.Application
         }
         public bool DeleteAdminInfo(int adminId)
         {
+            using (IDapperDatabase db = CreateDatabase())
+            {
+                db.Update<Admin, UserStatus>(c => c.ID == adminId, c => c.Status, UserStatus.Deleted);
+            }
             return Logger.Log($"删除管理员信息");
         }
         /// <summary>
@@ -42,7 +46,7 @@ namespace Simple.Authorization.Application
             MemoryHelper.Set(key, count);
             return count;
         }
-        public bool Login(string username, string password, out string token)
+        public bool Login(string username, string password, long time, string code, out string token)
         {
             if (!CheckHelper.CheckUserName(username, out string msg)) throw new MessageException(msg);
             if (!CheckHelper.CheckPassword(password, out msg)) throw new MessageException(msg);
@@ -52,12 +56,13 @@ namespace Simple.Authorization.Application
                 if (!db.Any<Admin>())
                 {
                     long timestamp = DateTime.Now.GetTimestamp();
+                    string encryption = MD5Encryption.Encryption(password);
                     db.Insert(new Admin
                     {
                         AdminName = username,
                         CreateAt = timestamp,
                         NickName = "超级管理员",
-                        Password = PwdEncryption.Encryption(password, timestamp),
+                        Password = PwdEncryption.Encryption(encryption, timestamp),
                         IsAdmin = true
                     });
                 }
@@ -97,11 +102,12 @@ namespace Simple.Authorization.Application
             {
                 long timestamp = DateTime.Now.GetTimestamp();
                 password = PwdEncryption.RandomPassword();
+                string encryption = MD5Encryption.Encryption(password);
                 db.Insert(new Admin()
                 {
                     AdminName = input.AdminName,
                     CreateAt = timestamp,
-                    Password = PwdEncryption.Encryption(password, timestamp),
+                    Password = PwdEncryption.Encryption(encryption, timestamp),
                     NickName = input.NickName,
                     Status = UserStatus.Normal
                 });
@@ -121,7 +127,8 @@ namespace Simple.Authorization.Application
                 Admin admin = db.FirstOrDefault<Admin>(c => c.ID == adminId);
                 if (admin == null) throw new MessageException($"管理员不存在");
                 password = PwdEncryption.RandomPassword();
-                admin.Password = PwdEncryption.Encryption(password, admin.CreateAt);
+                string encryption = MD5Encryption.Encryption(password);
+                admin.Password = PwdEncryption.Encryption(encryption, admin.CreateAt);
                 db.Update(admin, c => c.ID == admin.ID, c => c.Password);
             }
             return Logger.Log($"重置管理员密码");
@@ -134,7 +141,8 @@ namespace Simple.Authorization.Application
                 Admin admin = db.FirstOrDefault<Admin>(c => c.ID == adminId);
                 if (admin == null) throw new MessageException($"管理员不存在");
                 if (admin.Password != PwdEncryption.Encryption(oldpassword, admin.CreateAt)) throw new MessageException($"旧密码错误");
-                admin.Password = PwdEncryption.Encryption(newpassword, admin.CreateAt);
+                string encryption = MD5Encryption.Encryption(newpassword);
+                admin.Password = PwdEncryption.Encryption(encryption, admin.CreateAt);
                 db.Update(admin, c => c.ID == adminId, c => c.Password);
             }
             return Logger.Log($"修改密码");
