@@ -1,12 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Simple.Authorization.DBContext;
-using Simple.Web.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Simple.Authorization.Entity.DBContext;
 using Simple.Core.Dependency;
+using Simple.Core.Extensions;
+using Simple.Web.Mvc;
 
 namespace Simple.Authorization.Controllers
 {
@@ -17,6 +13,14 @@ namespace Simple.Authorization.Controllers
         public AuthorizationControllerBase()
         {
             DB = IocCollection.Resolve<AuthorizationDbContext>();
+        }
+
+        public int UserID
+        {
+            get
+            {
+                return HttpContext.GetClaimValue("ID").GetValue<int>();
+            }
         }
     }
 }

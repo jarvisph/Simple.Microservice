@@ -1,6 +1,7 @@
-﻿using Simple.Authorization.Model.Admin;
+﻿using Simple.Authorization.Domain.Model.Admin;
 using Simple.Core.Data.Schema;
 using Simple.Core.Domain.Enums;
+using Simple.Core.Mapper;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -27,6 +28,10 @@ namespace Simple.Authorization.Entity
         /// 昵称
         /// </summary>
         public string NickName { get; set; } = string.Empty;
+        /// <summary>
+        /// 头像
+        /// </summary>
+        public string Face { get; set; } = string.Empty;
         /// <summary>
         /// 密码
         /// </summary>
@@ -55,6 +60,9 @@ namespace Simple.Authorization.Entity
         /// 是否超级管理员
         /// </summary>
         public bool IsAdmin { get; set; }
-
+        public static implicit operator AdminRedis(Admin admin)
+        {
+            return admin.Map<AdminRedis>();
+        }
     }
 }

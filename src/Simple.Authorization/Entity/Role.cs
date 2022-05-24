@@ -1,4 +1,4 @@
-﻿using Simple.Authorization.Model.Role;
+﻿using Simple.Authorization.Domain.Model.Role;
 using Simple.Core.Data.Schema;
 using System;
 using System.Collections.Generic;

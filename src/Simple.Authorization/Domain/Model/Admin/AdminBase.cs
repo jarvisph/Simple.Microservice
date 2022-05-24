@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Simple.Authorization.Model.Admin
+namespace Simple.Authorization.Domain.Model.Admin
 {
     /// <summary>
     /// 管理员公共基类
@@ -15,6 +15,10 @@ namespace Simple.Authorization.Model.Admin
         /// 管理员ID
         /// </summary>
         public abstract int ID { get; set; }
+        /// <summary>
+        /// 角色ID
+        /// </summary>
+        public abstract int RoleID { get; set; }
         /// <summary>
         /// 登录名
         /// </summary>

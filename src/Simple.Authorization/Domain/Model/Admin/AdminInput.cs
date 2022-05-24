@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Simple.Authorization.Model.Admin
+namespace Simple.Authorization.Domain.Model.Admin
 {
     public class AdminInput : AdminBase
     {
         public override int ID { get; set; }
         public override string AdminName { get; set; } = string.Empty;
         public override string NickName { get; set; } = string.Empty;
-
+        public override int RoleID { get; set; }
     }
 }

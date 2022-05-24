@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Simple.Authorization.Domain.Services;
 using Simple.Authorization.Entity;
-using Simple.Authorization.Model.Admin;
+using Simple.Authorization.Domain.Model.Admin;
 using Simple.Core.Extensions;
 using Simple.Web.Mvc;
 
@@ -80,6 +81,19 @@ namespace Simple.Authorization.Controllers
         public ActionResult Delete([FromForm] int adminId)
         {
             return JsonResult(_adminAppService.DeleteAdminInfo(adminId));
+        }
+        /// <summary>
+        /// 重置密码
+        /// </summary>
+        /// <param name="adminId"></param>
+        /// <returns></returns>
+        [HttpPost, AllowAnonymous]
+        public ActionResult ResetPassword([FromForm] int adminId)
+        {
+            return JsonResult(_adminAppService.ResetPassword(adminId, out string password), new
+            {
+                Password = password
+            });
         }
     }
 }

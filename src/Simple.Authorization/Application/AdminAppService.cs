@@ -1,26 +1,26 @@
-﻿using Simple.Authorization.Domain.Services;
+﻿using Simple.Authorization.Domain.Caching;
+using Simple.Authorization.Domain.Model.Admin;
+using Simple.Authorization.Domain.Services;
 using Simple.Authorization.Entity;
-using Simple.Authorization.Model.Admin;
 using Simple.Core.Dapper;
 using Simple.Core.Domain.Enums;
-using Simple.Core.Logger;
 using Simple.Core.Encryption;
-using Simple.Core.Helper;
-using Simple.Web.Jwt;
 using Simple.Core.Extensions;
+using Simple.Core.Helper;
+using Simple.Core.Logger;
+using Simple.Web.Jwt;
 using System.Security.Claims;
-using System.Data;
-using Simple.Core.Authorization;
-using Simple.Authorization.Domain.Auth;
 
 namespace Simple.Authorization.Application
 {
     public class AdminAppService : AuthorizationAppServiceBase, IAdminAppService
     {
         private readonly JWTOption _options;
-        public AdminAppService(JWTOption option)
+        private readonly IAdminCaching _adminCaching;
+        public AdminAppService(JWTOption option, IAdminCaching adminCaching)
         {
             _options = option;
+            _adminCaching = adminCaching;
         }
         public bool DeleteAdminInfo(int adminId)
         {
@@ -50,6 +50,7 @@ namespace Simple.Authorization.Application
         {
             if (!CheckHelper.CheckUserName(username, out string msg)) throw new MessageException(msg);
             if (!CheckHelper.CheckPassword(password, out msg)) throw new MessageException(msg);
+            password = password.ToUpper();
             using (IDapperDatabase db = CreateDatabase())
             {
                 token = password;
@@ -89,6 +90,8 @@ namespace Simple.Authorization.Application
                                        new Claim(nameof(admin.ID), admin.ID.ToString()),
                                       };
                     token = JWTHelper.CreateToken(_options, claims);
+                    _adminCaching.SaveAdminInfo(admin);
+                    _adminCaching.SaveAdminToken(admin.ID, token);
                 }
             }
             return Logger.Log($"登录成功");

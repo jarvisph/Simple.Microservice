@@ -1,4 +1,4 @@
-﻿using Simple.Authorization.Model.Admin;
+﻿using Simple.Authorization.Domain.Model.Admin;
 using Simple.Core.Dependency;
 
 namespace Simple.Authorization.Domain.Services

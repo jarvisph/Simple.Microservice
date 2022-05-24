@@ -1,6 +1,6 @@
 ﻿using Simple.Authorization.Domain.Services;
 using Simple.Authorization.Entity;
-using Simple.Authorization.Model.Role;
+using Simple.Authorization.Domain.Model.Role;
 using Simple.Core.Authorization;
 using Simple.Core.Dapper;
 using Simple.Core.Logger;

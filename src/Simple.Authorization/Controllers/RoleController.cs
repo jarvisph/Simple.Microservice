@@ -1,16 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Simple.Authorization.Domain.Auth;
+using Simple.Authorization.Domain.Model.Role;
 using Simple.Authorization.Domain.Services;
-using Simple.Authorization.Model.Role;
 using Simple.Core.Authorization;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Simple.Web.Mvc;
 
 namespace Simple.Authorization.Controllers
 {
+    /// <summary>
+    /// 角色相关
+    /// </summary>
     public class RoleController : AuthorizationControllerBase
     {
         private readonly IRoleAppService _roleAppService;
@@ -43,7 +42,7 @@ namespace Simple.Authorization.Controllers
         /// <param name="input"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult Save([FromForm] RoleInput input)
+        public ActionResult Save([FromModel] RoleInput input)
         {
             return JsonResult(_roleAppService.SaveRoleInfo(input));
         }

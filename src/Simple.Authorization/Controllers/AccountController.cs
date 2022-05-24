@@ -1,18 +1,25 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Simple.Authorization.Domain.Auth;
+using Simple.Authorization.Domain.Caching;
+using Simple.Authorization.Domain.Model.Admin;
 using Simple.Authorization.Domain.Services;
 using Simple.Core.Authorization;
 using Simple.Core.Extensions;
 
 namespace Simple.Authorization.Controllers
 {
+    /// <summary>
+    /// 当前账号相关
+    /// </summary>
     public class AccountController : AuthorizationControllerBase
     {
         private readonly IAdminAppService _adminAppService;
-        public AccountController(IAdminAppService adminAppService)
+        private readonly IAdminCaching _adminCaching;
+        public AccountController(IAdminAppService adminAppService, IAdminCaching adminCaching)
         {
             _adminAppService = adminAppService;
+            _adminCaching = adminCaching;
         }
         /// <summary>
         /// 登录
@@ -32,11 +39,30 @@ namespace Simple.Authorization.Controllers
         [HttpPost]
         public ActionResult Info()
         {
-            return Ok(new
+            AdminRedis admin = _adminCaching.GetAdminInfo(UserID);
+            string[] permissions = admin.IsAdmin ? PermissionFinder.GetPermission(typeof(PermissionNames)).ToArray() : _adminCaching.GetPermission(UserID).ToArray();
+            return JsonResult(new
             {
-                UserID = HttpContext.GetClaimValue("ID"),
+                admin.ID,
+                admin.AdminName,
+                admin.RoleID,
+                admin.NickName,
+                Meuns = PermissionFinder.GetMemu(permissions, new PermissionProvider()),
+                Permissions = permissions
             });
         }
+        /// <summary>
+        /// 修改密码
+        /// </summary>
+        /// <param name="oldpassword"></param>
+        /// <param name="newpassword"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult UpdatePassword(string oldpassword, string newpassword)
+        {
+            return JsonResult(_adminAppService.UpdatePassword(UserID, oldpassword, newpassword));
+        }
+
         /// <summary>
         /// 菜单
         /// </summary>

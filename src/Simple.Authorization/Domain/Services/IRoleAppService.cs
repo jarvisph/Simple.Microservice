@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Simple.Authorization.Model.Role;
+using Simple.Authorization.Domain.Model.Role;
 using Simple.Core.Dependency;
 
 namespace Simple.Authorization.Domain.Services
