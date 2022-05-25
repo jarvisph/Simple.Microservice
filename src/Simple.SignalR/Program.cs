@@ -12,7 +12,7 @@ if (args.Contains("-consumer"))
 {
     IServiceCollection services = new ServiceCollection();
     services.AddSimple();
-    services.AddSqlServerProvider();
+    services.AddSqlServer(AppsettingConfig.GetConnectionString("DbConnection"));
     services.AddRabbitMQ(new RabbitOption(AppsettingConfig.GetConnectionString("RabbitConnection")));
     Thread.Sleep(-1);
 }

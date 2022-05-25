@@ -47,7 +47,7 @@ namespace Simple.Authorization.Controllers
                 admin.AdminName,
                 admin.RoleID,
                 admin.NickName,
-                Meuns = PermissionFinder.GetMemu(permissions, new PermissionProvider()),
+                Menus = PermissionFinder.GetMenu(permissions, new PermissionProvider()),
                 Permissions = permissions
             });
         }
@@ -71,7 +71,7 @@ namespace Simple.Authorization.Controllers
         public ActionResult Menu()
         {
             string[] permissions = PermissionFinder.GetPermission(typeof(PermissionNames)).ToArray();
-            return JsonResult(PermissionFinder.GetMemu(permissions, new PermissionProvider()));
+            return JsonResult(PermissionFinder.GetMenu(permissions, new PermissionProvider()));
         }
         /// <summary>
         /// 登出

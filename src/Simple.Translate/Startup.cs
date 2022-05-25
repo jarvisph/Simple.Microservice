@@ -6,11 +6,6 @@ using Simple.Core.Data;
 using Simple.Translate.Domain.DBContext;
 using Simple.Translate.Domain.Fitler;
 using Simple.Web.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Simple.Translate
 {
@@ -24,12 +19,12 @@ namespace Simple.Translate
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSimple();
-            services.AddSqlServerProvider();
+            services.AddSqlServer(Configuration.GetConnectionString("DbConnection"));
+            services.AddDbContext<TranslateDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DbConnection")));
             services.AddControllers(options =>
             {
                 options.Filters.Add<AuthorizationFilter>();
             });
-            services.AddDbContext<TranslateDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DbConnection")));
         }
 
         public void Configure(IApplicationBuilder app)

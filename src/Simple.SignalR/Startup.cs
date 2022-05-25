@@ -23,8 +23,10 @@ namespace Simple.SignalR
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSimple();
-            services.AddSqlServerProvider();
+            services.AddSqlServer(Configuration.GetConnectionString("DbConnection"));
             services.AddSingleton(c => new RabbitOption(Configuration.GetConnectionString("RabbitConnection")));
+            services.AddDbContext<SignalRDbContext>(d => d.UseSqlServer(Configuration.GetConnectionString("DbConnection")));
+
             services.AddSignalR(options =>
             {
                 options.AddFilter<AuthorizationHubFilter>();
@@ -36,7 +38,6 @@ namespace Simple.SignalR
             {
                 options.Filters.Add<AuthorizationControllerFilter>();
             });
-            services.AddDbContext<SignalRDbContext>(d => d.UseSqlServer(Configuration.GetConnectionString("DbConnection")));
         }
 
         public void Configure(IApplicationBuilder app)

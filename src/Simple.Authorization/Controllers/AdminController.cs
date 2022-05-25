@@ -30,6 +30,9 @@ namespace Simple.Authorization.Controllers
                 c.AdminName,
                 c.NickName,
                 c.LoginIP,
+                c.IsAdmin,
+                c.Face,
+                c.RoleID,
                 c.LoginAt,
                 c.Status,
                 c.CreateAt

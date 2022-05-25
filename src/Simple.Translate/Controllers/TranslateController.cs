@@ -68,7 +68,7 @@ namespace Simple.Translate.Controllers
         /// <param name="status"></param>
         /// <returns></returns>
         [HttpPost, ActionName("channel/list")]
-        public ActionResult Channel_List([FromForm] Guid? channel, [FromForm] string name, [FromForm] UserStatus? status)
+        public ActionResult Channel_List([FromForm] Guid? channel, [FromForm] string? name, [FromForm] UserStatus? status)
         {
             var query = _context.TranslateChannel.Where(channel, c => c.Channel == channel)
                                                  .Where(name, c => c.Name == name)

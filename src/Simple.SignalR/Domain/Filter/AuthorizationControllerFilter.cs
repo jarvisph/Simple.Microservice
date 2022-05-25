@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Simple.SignalR.Filter
+namespace Simple.SignalR.Domain.Filter
 {
     internal class AuthorizationControllerFilter : ActionFilterAttribute
     {

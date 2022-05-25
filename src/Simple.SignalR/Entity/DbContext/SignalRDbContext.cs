@@ -1,12 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Simple.SignalR.Entity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Simple.SignalR.Domain.DbContext
+namespace Simple.SignalR.Entity.DbContext
 {
     public class SignalRDbContext : Microsoft.EntityFrameworkCore.DbContext
     {

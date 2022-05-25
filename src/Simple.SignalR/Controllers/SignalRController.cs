@@ -39,7 +39,7 @@ namespace Simple.SignalR.Controllers
         /// 应用程序
         /// </summary>
         /// <returns></returns>
-        [Route("application/list"), HttpGet]
+        [Route("application/list"), HttpPost]
         public ActionResult ApplicationSettingList([FromForm] Guid? appKey)
         {
             var query = _context.Application.Where(appKey, c => c.AppKey == appKey);
@@ -65,10 +65,11 @@ namespace Simple.SignalR.Controllers
         /// 推送日志
         /// </summary>
         /// <returns></returns>
-        [Route("push/list"), HttpGet]
-        public ActionResult PushLog([FromForm] Guid? appKey, [FromForm] string connectionId)
+        [Route("push/list"), HttpPost]
+        public ActionResult PushLog([FromForm] Guid? appKey, [FromForm] string? connectionId, [FromForm] string? channel)
         {
             var query = _context.PushLog.Where(appKey, t => t.AppKey == appKey)
+                                        .Where(channel, t => t.Channel == channel)
                                         .Where(connectionId, t => t.ConnectionID == connectionId);
             return PageResult(query.OrderByDescending(c => c.CreateAt), t => new
             {
@@ -83,14 +84,15 @@ namespace Simple.SignalR.Controllers
         /// 连接日志
         /// </summary>
         /// <returns></returns>
-        [Route("connection/list"), HttpGet]
-        public ActionResult ConnectionList([FromForm] string connectionId, [FromForm] Guid? appkey)
+        [Route("connection/list"), HttpPost]
+        public ActionResult ConnectionList([FromForm] string? connectionId, [FromForm] Guid? appkey)
         {
             var query = _context.Connection.Where(connectionId, c => c.ConnectionID == connectionId)
                                            .Where(appkey, c => c.AppKey == appkey);
             return PageResult(query.OrderByDescending(c => c.CreateAt), t => new
             {
                 t.IP,
+                t.AppKey,
                 t.ConnectionID,
                 t.CreateAt,
                 t.DisconnectAt,
