@@ -4,7 +4,7 @@ using Simple.Core.Authorization;
 using Simple.Core.Extensions;
 using Simple.Core.Logger;
 using Simple.RabbitMQ;
-using Simple.SignalR.Domain.DbContext;
+using Simple.SignalR.Entity.DbContext;
 using Simple.SignalR.Domain.Services;
 using Simple.SignalR.Queues;
 using Simple.Web.Mvc;

@@ -5,8 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Simple.Core.Data;
 using Simple.RabbitMQ;
-using Simple.SignalR.Domain.DbContext;
-using Simple.SignalR.Filter;
+using Simple.SignalR.Entity.DbContext;
+using Simple.SignalR.Domain.Filter;
 using Simple.SignalR.Hubs;
 using Simple.Web.Extensions;
 

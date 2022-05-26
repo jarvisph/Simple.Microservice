@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using QRCoder;
+using Simple.Core.Domain.Enums;
+using Simple.Core.Extensions;
 using Simple.Web.Mvc;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Simple.Utils.Controllers
 {
@@ -19,7 +16,7 @@ namespace Simple.Utils.Controllers
         /// <param name="content"></param>
         /// <returns></returns>
         [HttpGet, Route("[controller]")]
-        public ActionResult Get(string content)
+        public FileContentResult Get([FromQuery]string content)
         {
             QRCodeGenerator qrGenerator = new QRCodeGenerator();
             QRCodeData qrCodeData = qrGenerator.CreateQrCode(content, QRCodeGenerator.ECCLevel.Q);
@@ -44,7 +41,7 @@ namespace Simple.Utils.Controllers
             Bitmap image = qrCode.GetGraphic(10);
             MemoryStream ms = new MemoryStream();
             image.Save(ms, ImageFormat.Png);
-            return File(ms.ToArray(), "image/png");
+            return File(ms.ToArray(), ContentType.PNG.GetDescription());
         }
     }
 }
