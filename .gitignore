@@ -27,3 +27,5 @@
 /src/Simple.Translate/bin
 /web/Web.Admin/node_modules
 /web
+/test/Simple.Download/bin
+/test/Simple.Download/obj

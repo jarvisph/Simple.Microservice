@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Simple.Authorization.Domain.Auth;
-using Simple.Authorization.Domain.Caching;
+using Simple.Authorization.Domain.Cache;
 using Simple.Authorization.Domain.Model.Admin;
 using Simple.Core.Authorization;
 using Simple.Core.Extensions;

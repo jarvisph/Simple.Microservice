@@ -31,7 +31,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Simple.Utils", "src\Simple.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Simple.Utils.Test", "test\Simple.Utils.Test\Simple.Utils.Test.csproj", "{64F95DA6-EBBB-4838-B8EE-B1C393781521}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simple.Translate", "src\Simple.Translate\Simple.Translate.csproj", "{0206C487-3435-42D0-AC60-1169A9E68116}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Simple.Translate", "src\Simple.Translate\Simple.Translate.csproj", "{0206C487-3435-42D0-AC60-1169A9E68116}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simple.Download", "test\Simple.Download\Simple.Download.csproj", "{CDFFD784-8FF0-412D-950B-F141431C0A05}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -87,6 +89,10 @@ Global
 		{0206C487-3435-42D0-AC60-1169A9E68116}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0206C487-3435-42D0-AC60-1169A9E68116}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0206C487-3435-42D0-AC60-1169A9E68116}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDFFD784-8FF0-412D-950B-F141431C0A05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDFFD784-8FF0-412D-950B-F141431C0A05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDFFD784-8FF0-412D-950B-F141431C0A05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDFFD784-8FF0-412D-950B-F141431C0A05}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -104,6 +110,7 @@ Global
 		{995469DC-1B33-4E10-9EBF-AA6166C265E0} = {1552531D-C230-4C7E-BBEC-13AACCF88743}
 		{64F95DA6-EBBB-4838-B8EE-B1C393781521} = {FAC95BDB-6A60-4440-8A1B-D093F979B3EB}
 		{0206C487-3435-42D0-AC60-1169A9E68116} = {1552531D-C230-4C7E-BBEC-13AACCF88743}
+		{CDFFD784-8FF0-412D-950B-F141431C0A05} = {FAC95BDB-6A60-4440-8A1B-D093F979B3EB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4E04FEA1-A4FC-4A38-80D8-2F726D18FF11}

@@ -1,4 +1,4 @@
-﻿using Simple.Authorization.Domain.Caching;
+﻿using Simple.Authorization.Domain.Cache;
 using Simple.Authorization.Domain.Model.Admin;
 using Simple.Redis;
 using StackExchange.Redis;
