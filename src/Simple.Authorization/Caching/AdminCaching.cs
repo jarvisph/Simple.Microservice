@@ -40,6 +40,11 @@ namespace Simple.Authorization.Caching
             }
             batch.Execute();
         }
+        public void DeletePermission(int roleId)
+        {
+            string key = ADMIN_PERMISSION + roleId;
+            Redis.KeyDelete(key);
+        }
 
         public AdminRedis GetAdminInfo(int adminId)
         {
@@ -70,5 +75,7 @@ namespace Simple.Authorization.Caching
         {
             return Redis.HashDelete(ADMIN_TOKEN, adminId);
         }
+
+
     }
 }

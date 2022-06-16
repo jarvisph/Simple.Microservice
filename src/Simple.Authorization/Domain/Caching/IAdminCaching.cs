@@ -15,11 +15,16 @@ namespace Simple.Authorization.Domain.Caching
         /// <returns></returns>
         IEnumerable<string> GetPermission(int roleId);
         /// <summary>
-        /// 保存管理员权限
+        /// 保存角色权限
         /// </summary>
         /// <param name="roleId">角色ID</param>
         /// <param name="permissions"></param>
         void SavePermission(int roleId, IEnumerable<string> permissions);
+        /// <summary>
+        /// 删除角色权限
+        /// </summary>
+        /// <param name="roleId"></param>
+        void DeletePermission(int roleId);
         /// <summary>
         /// 检查权限
         /// </summary>
