@@ -80,7 +80,7 @@ namespace Simple.Authorization.Controllers
         [HttpPost]
         public ActionResult Logout()
         {
-            return Ok("登出");
+            return JsonResult(_adminCaching.RemoveToken(UserID));
         }
     }
 }

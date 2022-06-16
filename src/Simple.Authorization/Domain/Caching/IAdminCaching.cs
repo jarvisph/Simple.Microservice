@@ -51,6 +51,12 @@ namespace Simple.Authorization.Domain.Caching
         /// <param name="token"></param>
         /// <returns></returns>
         bool CheckToken(int adminId, string token);
+        /// <summary>
+        /// 移除token
+        /// </summary>
+        /// <param name="adminId"></param>
+        /// <returns></returns>
+        bool RemoveToken(int adminId);
 
     }
 }

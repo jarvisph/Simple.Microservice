@@ -4,14 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
 using Simple.Authorization.Entity.DBContext;
 using Simple.Authorization.Domain.Filter;
 using Simple.Core.Data;
 using Simple.Core.Http;
 using Simple.Web.Extensions;
 using Simple.Web.Jwt;
-using Simple.Web.Swagger;
 using Simple.Redis;
 
 namespace Simple.Authorization
@@ -36,41 +34,6 @@ namespace Simple.Authorization
             services.AddJwt(Configuration.GetConnectionString("JwtConnection"));
             services.AddRedis(Configuration.GetConnectionString("RedisConnection"));
             services.AddDbContext<AuthorizationDbContext>(d => d.UseSqlServer(Configuration.GetConnectionString("DbConnection")));
-
-            //swagger 可注释
-            services.AddSwaggerGen(options =>
-            {
-                options.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Version = "v1",
-                    Title = "权限系统",
-                    Description = "权限系统"
-                });
-                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
-                {
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer",
-                    BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
-                    Description = "JWT Authorization header using the Bearer scheme."
-                });
-                options.OperationFilter<BasicAuthOperationsFilter>();
-                options.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {
-                          new OpenApiSecurityScheme
-                          {
-                              Reference = new OpenApiReference
-                              {
-                                  Type = ReferenceType.SecurityScheme,
-                                  Id = "Bearer",
-                              }
-                          },
-                         new string[] {}
-                    }
-                });
-            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -86,13 +49,6 @@ namespace Simple.Authorization
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-            });
-
-            //swagger 可注释
-            app.UseSwagger();
-            app.UseSwaggerUI(options =>
-            {
-                options.SwaggerEndpoint("/swagger/v1/swagger.json", "V1 Docs");
             });
         }
     }

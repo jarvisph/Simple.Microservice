@@ -66,5 +66,9 @@ namespace Simple.Authorization.Caching
         {
             return Redis.HashGet(ADMIN_TOKEN, adminId).GetRedisValue<string>() == token;
         }
+        public bool RemoveToken(int adminId)
+        {
+            return Redis.HashDelete(ADMIN_TOKEN, adminId);
+        }
     }
 }

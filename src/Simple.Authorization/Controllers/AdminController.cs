@@ -90,7 +90,7 @@ namespace Simple.Authorization.Controllers
         /// </summary>
         /// <param name="adminId"></param>
         /// <returns></returns>
-        [HttpPost, AllowAnonymous]
+        [HttpPost]
         public ActionResult ResetPassword([FromForm] int adminId)
         {
             return JsonResult(_adminAppService.ResetPassword(adminId, out string password), new
