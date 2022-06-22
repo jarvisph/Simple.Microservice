@@ -1,14 +1,11 @@
 ﻿using System.IO.Compression;
-using System.Text;
 using System.Text.RegularExpressions;
 
-string servicename = "Simple.Authorization";
+string SERVICENAME = "Simple.Authorization";
 string replacename = "Demo";
 string newpath = "\\virtual\\" + replacename;
-string servicepath = Directory.GetCurrentDirectory() + "\\wwwroot\\" + servicename;
-string newservicename = $"Web.{replacename}.API";
+string servicepath = Directory.GetCurrentDirectory() + "\\wwwroot\\" + SERVICENAME;
 string zippath = Directory.GetCurrentDirectory() + "\\virtual";
-string[] services = new string[] { "Application", "Caching", "Domain", "Entity" };
 bool multilayer = true;
 
 if (!Directory.Exists(newpath))
@@ -32,7 +29,7 @@ void Director(string dir)
     DirectoryInfo[] directs = d.GetDirectories();
     foreach (FileInfo file in d.GetFiles())
     {
-        WriteFile(dir.Replace("wwwroot", "virtual").Replace(servicename, replacename), file);
+        WriteFile(dir.Replace("wwwroot", "virtual").Replace(SERVICENAME, replacename), file);
     }
     foreach (DirectoryInfo dd in directs)
     {
@@ -46,25 +43,22 @@ void MultilDirector(string dir)
 {
     DirectoryInfo d = new DirectoryInfo(dir);
     DirectoryInfo[] directs = d.GetDirectories();
-    string newservicepath = dir.Replace("wwwroot", "virtual").Replace(servicename, replacename);
-    FileInfo csproj = d.GetFiles().FirstOrDefault(c => c.Name.Contains(servicename));
     CreateSln();
     foreach (DirectoryInfo dd in directs)
     {
         switch (dd.Name)
         {
             case "Application":
-            case "Caching":
-            case "Domain":
+            case "Consumer":
             case "Entity":
             case "Job":
                 {
-                    CreateCsproj($"{replacename}.{dd.Name}", csproj.OpenText().ReadToEnd());
+                    CreateCsproj(dd.Name);
                 }
                 break;
             default:
                 {
-                    CreateCsproj($"Web.{replacename}.API", "");
+                    CreateCsproj("WebAPI");
                 }
                 break;
         }
@@ -77,13 +71,13 @@ void WriteMultil(string dir)
     DirectoryInfo d = new DirectoryInfo(dir);
     DirectoryInfo[] directs = d.GetDirectories();
     string newservicepath = dir.Replace("wwwroot", "virtual")
-         .Replace(servicename, replacename)
+         .Replace(SERVICENAME, replacename)
          .Replace("Application", $"{replacename}.Application")
-         .Replace("Caching", $"{replacename}.Caching")
-         .Replace("Domain", $"{replacename}.Domain")
          .Replace("Entity", $"{replacename}.Entity")
+         .Replace("Job", $"{replacename}.Entity")
+         .Replace("Consumer", $"{replacename}.Entity")
          .Replace("Controllers", $"\\Web.{replacename}.API\\Controllers");
-    Regex regex = new Regex("Application|Caching|Domain|Entity|Controllers");
+    Regex regex = new Regex("Application|Entity|Controllers|Job|Consumer");
     if (!regex.IsMatch(dir))
     {
         newservicepath += $"\\Web.{replacename}.API";
@@ -105,35 +99,42 @@ void WriteFile(string path, FileInfo file)
         Directory.CreateDirectory(path);
     }
     string filename = file.Name;
-    if (filename.Contains(servicename))
+    if (filename.Contains(SERVICENAME))
     {
-        filename = filename.Replace(servicename, replacename);
+        filename = filename.Replace(SERVICENAME, replacename);
     }
-    if (multilayer && file.Name == $"{servicename}.csproj")
+    if (multilayer && file.Name == $"{SERVICENAME}.csproj")
         return;
     StreamReader sr = file.OpenText();
     //创建并写入
     FileStream stream = new FileStream(path + "\\" + filename, FileMode.OpenOrCreate, FileAccess.Write);
     StreamWriter sw = new StreamWriter(stream);
-    string content = sr.ReadToEnd().Replace(servicename, replacename);
+    string content = sr.ReadToEnd().Replace(SERVICENAME, replacename);
     sw.Write(content);
     sw.Close();
     stream.Close();
 }
 //创建csproj文件
-void CreateCsproj(string service, string content)
+void CreateCsproj(string service)
 {
-    string newservicepath = $"{Directory.GetCurrentDirectory()}\\virtual\\{replacename}\\{service}";
+    string servicename = $"{replacename}.{service}";
+    if (service == "WebAPI")
+    {
+        servicename = $"Web.{replacename}.API";
+    }
+    string newservicepath = $"{Directory.GetCurrentDirectory()}\\virtual\\{replacename}\\{servicename}";
     if (!Directory.Exists(newservicepath))
     {
         Directory.CreateDirectory(newservicepath);
     }
-    FileStream stream = new FileStream(newservicepath + $"\\{service}.csproj", FileMode.OpenOrCreate, FileAccess.Write);
+    FileInfo file = new FileInfo($"static/{service.ToLower()}.txt");
+    FileStream stream = new FileStream(newservicepath + $"\\{servicename}.csproj", FileMode.OpenOrCreate, FileAccess.Write);
     StreamWriter sw = new StreamWriter(stream);
-    sw.Write(content);
+    sw.Write(file.OpenText().ReadToEnd().Replace(SERVICENAME, replacename));
     sw.Close();
     stream.Close();
 }
+//创建sln文件
 void CreateSln()
 {
     string slnpath = $"{Directory.GetCurrentDirectory()}\\virtual\\{replacename}";
@@ -141,10 +142,22 @@ void CreateSln()
     {
         Directory.CreateDirectory(slnpath);
     }
-    FileInfo file = new FileInfo("sln.txt");
+    FileInfo file = new FileInfo("static/sln.txt");
     FileStream stream = new FileStream(slnpath + $"\\{replacename}.sln", FileMode.OpenOrCreate, FileAccess.Write);
     StreamWriter sw = new StreamWriter(stream);
-    sw.Write(file.OpenText().ReadToEnd().Replace(servicename, replacename));
+    string project = Guid.NewGuid().ToString().ToUpper();
+    string application = Guid.NewGuid().ToString().ToUpper();
+    string entity = Guid.NewGuid().ToString().ToUpper();
+    string web = Guid.NewGuid().ToString().ToUpper();
+    string solu = Guid.NewGuid().ToString().ToUpper();
+    sw.Write(file.OpenText().ReadToEnd()
+                 .Replace(SERVICENAME, replacename)
+                 .Replace("Web.Authorization.API", $"Web.{replacename}.API")
+                 .Replace("$PROJECT", project)
+                 .Replace("$APPLICATION", application)
+                 .Replace("$ENTITY", entity)
+                 .Replace("$WEB", web)
+                 .Replace("$SOLU", solu));
     sw.Close();
     stream.Close();
 }

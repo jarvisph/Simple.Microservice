@@ -1,9 +1,8 @@
-﻿using Simple.Authorization.Domain.Cache;
-using Simple.Authorization.Domain.Model.Admin;
+﻿using Simple.Authorization.Entity.Model.Admin;
 using Simple.Redis;
 using StackExchange.Redis;
 
-namespace Simple.Authorization.Caching
+namespace Simple.Authorization.Application.Caching
 {
     internal class AdminCaching : RedisDatabase, IAdminCaching
     {

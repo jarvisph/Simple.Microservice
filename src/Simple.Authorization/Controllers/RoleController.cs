@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Simple.Authorization.Domain.Auth;
-using Simple.Authorization.Domain.Model.Role;
-using Simple.Authorization.Domain.Services;
+using Simple.Authorization.Application.Auth;
+using Simple.Authorization.Application.Services;
+using Simple.Authorization.Entity.Model.Role;
 using Simple.Core.Authorization;
 using Simple.Web.Mvc;
 

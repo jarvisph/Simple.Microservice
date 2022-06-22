@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Simple.Authorization.Domain.Model.Admin
+namespace Simple.Authorization.Entity.Model.Admin
 {
     /// <summary>
     /// 管理员公共基类

@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Simple.Authorization.Entity;
+using Simple.Authorization.Entity.DB;
 using Simple.Core.Localization;
 using System;
 using System.Collections.Generic;

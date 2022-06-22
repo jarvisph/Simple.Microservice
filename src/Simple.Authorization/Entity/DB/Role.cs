@@ -1,4 +1,4 @@
-﻿using Simple.Authorization.Domain.Model.Role;
+﻿using Simple.Authorization.Entity.Model.Role;
 using Simple.Core.Data.Schema;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Simple.Authorization.Entity
+namespace Simple.Authorization.Entity.DB
 {
     /// <summary>
     /// 角色表

@@ -1,11 +1,10 @@
-﻿using Simple.Authorization.Domain.Cache;
-using Simple.Authorization.Domain.Model.Role;
-using Simple.Authorization.Domain.Services;
-using Simple.Authorization.Entity;
+﻿using Simple.Authorization.Application.Caching;
+using Simple.Authorization.Entity.DB;
+using Simple.Authorization.Entity.Model.Role;
 using Simple.Core.Dapper;
 using Simple.Core.Logger;
 
-namespace Simple.Authorization.Application
+namespace Simple.Authorization.Application.Services
 {
     internal class RoleAppService : AuthorizationAppServiceBase, IRoleAppService
     {

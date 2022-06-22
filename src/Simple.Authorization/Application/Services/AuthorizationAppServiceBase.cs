@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Simple.Core.Domain;
 using Simple.Core.Localization;
 
-namespace Simple.Authorization.Application
+namespace Simple.Authorization.Application.Services
 {
     public abstract class AuthorizationAppServiceBase : AppServiceBase
     {

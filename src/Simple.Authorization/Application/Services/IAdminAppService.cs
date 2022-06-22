@@ -1,7 +1,7 @@
-﻿using Simple.Authorization.Domain.Model.Admin;
+﻿using Simple.Authorization.Entity.Model.Admin;
 using Simple.Core.Dependency;
 
-namespace Simple.Authorization.Domain.Services
+namespace Simple.Authorization.Application.Services
 {
     public interface IAdminAppService : ISingletonDependency
     {

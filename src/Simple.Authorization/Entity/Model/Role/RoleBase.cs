@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Simple.Authorization.Domain.Model.Role
+namespace Simple.Authorization.Entity.Model.Role
 {
     public abstract class RoleBase
     {

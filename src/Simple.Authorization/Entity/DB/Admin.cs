@@ -1,4 +1,4 @@
-﻿using Simple.Authorization.Domain.Model.Admin;
+﻿using Simple.Authorization.Entity.Model.Admin;
 using Simple.Core.Data.Schema;
 using Simple.Core.Domain.Enums;
 using Simple.Core.Mapper;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Simple.Authorization.Entity
+namespace Simple.Authorization.Entity.DB
 {
     /// <summary>
     /// 管理员表

@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32317.152
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{$PROJECT}") = "Simple.Authorization.Application", "Simple.Authorization.Application\Simple.Authorization.Application.csproj", "{$APPLICATION}"
+EndProject
+Project("{$PROJECT}") = "Simple.Authorization.Entity", "Simple.Authorization.Entity\Simple.Authorization.Entity.csproj", "{$ENTITY}"
+EndProject
+Project("{$PROJECT}") = "Web.Authorization.API", "Web.Authorization.API\Web.Authorization.API.csproj", "{$WEB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{$APPLICATION}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{$APPLICATION}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{$APPLICATION}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{$APPLICATION}.Release|Any CPU.Build.0 = Release|Any CPU
+		{$ENTITY}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{$ENTITY}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{$ENTITY}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{$ENTITY}.Release|Any CPU.Build.0 = Release|Any CPU
+		{$WEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{$WEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{$WEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{$WEB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {$SOLU}
+	EndGlobalSection
+EndGlobal

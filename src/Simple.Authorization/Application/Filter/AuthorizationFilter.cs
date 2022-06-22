@@ -1,15 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Simple.Authorization.Domain.Auth;
-using Simple.Authorization.Domain.Cache;
-using Simple.Authorization.Domain.Model.Admin;
+using Simple.Authorization.Application.Auth;
+using Simple.Authorization.Application.Caching;
+using Simple.Authorization.Entity.Model.Admin;
 using Simple.Core.Authorization;
 using Simple.Core.Extensions;
 using Simple.Web.Jwt;
 using Simple.Web.Mvc;
 using System.Reflection;
 
-namespace Simple.Authorization.Domain.Filter
+namespace Simple.Authorization.Application.Filter
 {
     /// <summary>
     /// 权限过滤器

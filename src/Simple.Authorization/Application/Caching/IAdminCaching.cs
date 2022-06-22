@@ -1,7 +1,7 @@
-﻿using Simple.Authorization.Domain.Model.Admin;
+﻿using Simple.Authorization.Entity.Model.Admin;
 using Simple.Core.Dependency;
 
-namespace Simple.Authorization.Domain.Cache
+namespace Simple.Authorization.Application.Caching
 {
     /// <summary>
     /// 管理员缓存相关#0

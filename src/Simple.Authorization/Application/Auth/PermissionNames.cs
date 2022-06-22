@@ -1,4 +1,4 @@
-﻿namespace Simple.Authorization.Domain.Auth
+﻿namespace Simple.Authorization.Application.Auth
 {
     public static class PermissionNames
     {

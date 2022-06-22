@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Simple.Authorization.Domain.Services;
-using Simple.Authorization.Entity;
-using Simple.Authorization.Domain.Model.Admin;
 using Simple.Core.Extensions;
 using Simple.Web.Mvc;
+using Simple.Authorization.Application.Services;
+using Simple.Authorization.Entity.Model.Admin;
+using Simple.Authorization.Entity.DB;
 
 namespace Simple.Authorization.Controllers
 {

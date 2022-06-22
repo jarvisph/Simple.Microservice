@@ -1,7 +1,6 @@
-﻿using Simple.Authorization.Domain.Cache;
-using Simple.Authorization.Domain.Model.Admin;
-using Simple.Authorization.Domain.Services;
-using Simple.Authorization.Entity;
+﻿using Simple.Authorization.Application.Caching;
+using Simple.Authorization.Entity.DB;
+using Simple.Authorization.Entity.Model.Admin;
 using Simple.Core.Dapper;
 using Simple.Core.Domain.Enums;
 using Simple.Core.Encryption;
@@ -11,7 +10,7 @@ using Simple.Core.Logger;
 using Simple.Web.Jwt;
 using System.Security.Claims;
 
-namespace Simple.Authorization.Application
+namespace Simple.Authorization.Application.Services
 {
     public class AdminAppService : AuthorizationAppServiceBase, IAdminAppService
     {

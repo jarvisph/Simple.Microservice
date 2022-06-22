@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Simple.Authorization.Domain.Auth;
-using Simple.Authorization.Domain.Cache;
-using Simple.Authorization.Domain.Model.Admin;
-using Simple.Authorization.Domain.Services;
+using Simple.Authorization.Application.Auth;
+using Simple.Authorization.Application.Caching;
+using Simple.Authorization.Application.Services;
+using Simple.Authorization.Entity.Model.Admin;
 using Simple.Core.Authorization;
 using Simple.Core.Extensions;
 

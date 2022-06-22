@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Simple.Authorization.Domain.Auth
+namespace Simple.Authorization.Application.Auth
 {
-    internal class PermissionProvider : AuthorizationProvider
+    public class PermissionProvider : AuthorizationProvider
     {
         public override void SetPermissions(IPermissionDefinitionContext context)
         {
