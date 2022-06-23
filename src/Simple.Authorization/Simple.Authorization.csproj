@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Simple.dotNet.Redis" Version="1.0.3" />
-    <PackageReference Include="Simple.dotNet.Web" Version="1.0.3" />
+    <ProjectReference Include="..\..\..\Simple.dotNet\src\Simple.dotNet.Redis\Simple.dotNet.Redis.csproj" />
+    <ProjectReference Include="..\..\..\Simple.dotNet\src\Simple.dotNet.Web\Simple.dotNet.Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>

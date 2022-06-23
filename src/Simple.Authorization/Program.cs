@@ -13,7 +13,6 @@ using Simple.Web.Jwt;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 IServiceCollection services = builder.Services;
 
-
 services.AddControllers(options =>
 {
     options.Filters.Add<AuthorizationFilter>();

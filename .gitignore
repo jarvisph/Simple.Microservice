@@ -29,3 +29,5 @@
 /web
 /test/Simple.Download/bin
 /test/Simple.Download/obj
+/test/Simple.Web.API/obj
+/test/Simple.Web.API/bin
