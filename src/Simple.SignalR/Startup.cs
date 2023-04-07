@@ -9,6 +9,7 @@ using Simple.SignalR.Entity.DbContext;
 using Simple.SignalR.Domain.Filter;
 using Simple.SignalR.Hubs;
 using Simple.Web.Extensions;
+using Simple.SignalR.Filter;
 
 namespace Simple.SignalR
 {

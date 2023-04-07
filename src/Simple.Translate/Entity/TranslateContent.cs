@@ -1,13 +1,8 @@
 ﻿using Newtonsoft.Json;
 using Simple.Core.Data.Schema;
 using Simple.Core.Languages;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Simple.Translate.Entity
 {

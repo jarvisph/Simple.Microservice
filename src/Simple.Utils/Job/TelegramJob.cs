@@ -13,7 +13,8 @@ namespace Simple.Utils.Consumers
 {
     public class TelegramJob : JobServiceBase
     {
-        public override TimeSpan Time => TimeSpan.MinValue;
+        public override int Time => throw new NotImplementedException();
+
         public override int Invoke()
         {
             TelegramQueue.Consumer(message =>

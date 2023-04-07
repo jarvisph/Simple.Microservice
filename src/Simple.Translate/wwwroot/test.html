@@ -1,0 +1,1507 @@
+﻿<style type="text/css">
+    #anchor-trade-header {
+        position: fixed;
+        width: 100%;
+        top: 0;
+        height: 38px;
+        z-index: 999;
+        box-shadow: 0 2px 2px 0 rgb(0 0 0 / 10%);
+    }
+</style>
+<div class="layui-card layui-form  anchor anchor-trade" id="anchor-trade" lay-filter="anchor-trade">
+    <script type="text/html" template lay-url="/manage/account/Info" lay-type="post"
+            lay-done="BW.callback['anchor-trade-admin'](d)">
+        <div class="layui-card-header layui-bg-gray" id="anchor-trade-header">
+            <button class="layui-btn layui-btn-primary am-icon-plus" add-anchor-event data-area="xl">
+                添加主播
+            </button>
+            <button class="layui-btn layui-btn-primary am-icon-map-o" data-popup="diag/anchor/news" data-area="xl">
+                发布公告
+            </button>
+            <button class="layui-btn layui-btn-primary am-icon-refresh" data-action="anchor/trade/refresh">
+                刷新缓存
+            </button>
+            <div class="text layui-right" style="padding-right: 25px;">
+                <span>操盘人：{{d.info.AdminName}}</span>
+                <span>当前时间：<span id="anchor-trade-time"></span></span>
+            </div>
+        </div>
+    </script>
+    <script type="text/html" template lay-type="post" lay-url="anchor/trade/anchor"
+            lay-done="BW.callback['anchor-trade'](d)">
+        <div class="layui-card-body anchor-list" style="margin-top: 50px;padding: 0px 15px;"></div>
+    </script>
+</div>
+
+
+<!--竞猜项模版-->
+<script type="text/html" id="anchor-trade-item-template">
+    <div class="layui-row bet-item" data-betId="{{d.ID}}">
+        <table class="item-table">
+            <caption class="layui-bg-cyan title">
+                <div class="layui-btn-group bet-status">
+                    <button type="button" class="layui-btn layui-btn-xs {{d.IsVisible?'am-icon-eye':'am-icon-eye-slash'}}" status-event="visible" data-betId="{{d.ID}}" value="{{d.IsVisible}}" title="显示/隐藏"></button>
+                    <button type="button" class="layui-btn layui-btn-xs layui-btn-primary {{d.IsLock?'am-icon-lock layui-text-red':'am-icon-unlock'}}" status-event="lock" data-betId="{{d.ID}}" value="{{d.IsLock}}" title="锁定/解锁"></button>
+                </div>
+                {{#if(d.IsLive){ }}
+                <i class="am-icon-life-ring am-icon-spin"></i>
+                {{#}}}
+                {{d.Title}}[{{d.ID}}]
+                {{UI.anchor.BetSetting(d.Setting,"hidden")}}
+                <div class="template">
+                    {{UI.anchor.BetTemplate(d.Template)}}
+                    <button class="layui-btn layui-btn-xs layui-btn-primary am-icon-chevron-circle-down" bet-event="up" value="0" title="收起"></button>
+                </div>
+            </caption>
+            <thead>
+                {{UI.anchor.theadHeader(d.Headers,d.Setting,d.Handicap,"trade")}}
+            </thead>
+            <tbody>
+                {{UI.anchor.tbodyItem(d.Items,d.Setting,d.Handicap,"trade")}}
+            </tbody>
+        </table>
+    </div>
+</script>
+
+<!--投注项操作模版-->
+<script type="text/html" id="anchor-trade-tool-template">
+    <div class="layui-btn-group">
+        <button class="layui-btn  layui-btn-xs am-icon-gavel" lay-event="result" title="赛果录入"></button>
+        <button class="layui-btn  layui-btn-xs am-icon-copy" lay-event="copy" title="复制盘口"></button>
+        <button class="layui-btn  layui-btn-xs am-icon-edit" lay-event="edit" title="修改盘口"></button>
+    </div>
+</script>
+
+<!--盘口操作模版-->
+<script type="text/html" id="anchor-trade-toolbar">
+    <div class="layui-btn-group">
+        <button class="layui-btn  layui-btn-xs am-icon-eye" lay-event="Visible">显示</button>
+        <button class="layui-btn  layui-btn-xs am-icon-eye-slash layui-btn-warm" lay-event="Hide">隐藏</button>
+        <button class="layui-btn  layui-btn-xs am-icon-lock layui-btn-danger" lay-event="Lock">锁定</button>
+        <button class="layui-btn  layui-btn-xs am-icon-unlock" lay-event="UnLock">解锁</button>
+        <!-- <button class="layui-btn  layui-btn-xs am-icon-life-ring layui-btn-danger" lay-event="Live">开滚</button>
+        <button class="layui-btn  layui-btn-xs " lay-event="UnLive">关滚</button> -->
+        <button class="layui-btn  layui-btn-xs" lay-event="Cache">刷新缓存</button>
+        <button class="layui-btn  layui-btn-xs" lay-event="Rule">有效规则</button>
+        <button class="layui-btn  layui-btn-xs" lay-event="Result">批量录入</button>
+        <button class="layui-btn  layui-btn-xs" lay-event="Play">添加玩法</button>
+        <button class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="Cancel">取消当期</button>
+        <button class="layui-btn  layui-btn-xs am-icon-search" lay-event="Search"> 刷新</button>
+        <button class="layui-btn  layui-btn-xs am-icon-chevron-circle-up" lay-event="AllUp">全部收起</button>
+        <button class="layui-btn  layui-btn-xs am-icon-chevron-circle-up" lay-event="HandicapUp">让分收起</button>
+    </div>
+</script>
+<!--订单列表-->
+<script type="text/html" id="anchor-trade-order-template">
+    <li class="{{d.Status}}">
+        <div class="trade-content">
+            <p>
+                [{{new Date(d.CreateAt).formatDate("hh:mm:ss")}}] 第{{d.Code}}期
+                {{#if(d.Status==="Wait"){ }}
+                <a href='javascript:void(0)' revoke-event="{{d.OrderID}}" class="am-icon-ban layui-text-red" title="提前提单"></a>
+                {{#}}}
+                <span class="right">
+                    ￥{{htmlFunction.number(d.BetMoney,0)}} @
+                    {{#if(d.Odds>2) { }}
+                    <span class="layui-text-red">{{ d.Odds}}</span>
+                    {{#}else{ }}
+                    <span class="layui-text-green">{{d.Odds}}</span>
+                    {{#}}}
+                </span>
+            </p>
+            <p>
+                [<span class="orderid" title="双击复制-{{d.OrderID}}">{{d.OrderID}}</span>]
+                <span title="{{d.BetID}}">{{d.Bet}}/{{d.Content}}</span>
+                <span class="layui-text-blue" title="">[{{d.BetID}}]</span>
+                {{#if(d.Status==='Settlement'){ }}
+                <span class="layui-right">{{ htmlFunction.itemStatus(d.LoseWinStatus) }}</span>
+                {{#}}}
+            </p>
+            <p>
+                <span>[{{d.SiteID}}]</span>
+                {{# var siteRate=((d.SiteRate.BetProfit/d.SiteRate.BetMoney)*100).toFixed(2) }}
+                <span>
+                    [盈亏<span class="{{d.SiteRate.BetProfit===0?'':(d.SiteRate.Money>0?'layui-text-green':'layui-text-red')}}">{{ htmlFunction.number(d.SiteRate.BetProfit,0)}}</span>]
+                </span>
+                <span>
+                    [率<span class="{{ d.SiteRate.BetProfit===0?'':(siteRate>0?'layui-text-green':'layui-text-red')}}">{{ htmlFunction.number(siteRate)}}%</span>]
+                </span>
+            </p>
+            <p>
+                [<span class="username">{{htmlFunction.merchant.userName(d.UserID,d.UserName)}}</span>]
+                {{# var userRate=((d.UserRate.BetProfit/d.UserRate.BetMoney)*100).toFixed(2) }}
+                <span>
+                    [盈亏<span class="{{d.UserRate.BetProfit===0?'':(d.UserRate.Money>0?'layui-text-green':'layui-text-red')}}">{{ htmlFunction.number(d.UserRate.BetProfit,0)}}</span>]
+                </span>
+                <span>
+                    [率<span class="{{d.UserRate.BetProfit===0?'':(userRate>0?'layui-text-green':'layui-text-red')}}">{{ htmlFunction.number(userRate)}}%</span>]
+                </span>
+                <!--风控IP-->
+                {{#if(d.IPBlack){ }}
+                <span class="layui-text-red" title="{{d.IP}}">（可疑）</span>
+                {{#}else{ }}
+                <span>
+                    <a href='javascript:UI.merchant.UserTag({{d.UserID}},"Anchor","{{d.IP}}")'
+                       class="am-icon-cog layui-text-red" title="设置标记"></a>
+                </span>
+                {{#}}}
+                {{#if(d.UserRate.UserID===0){ }}
+                <span class="layui-right layui-text-red">(新会员)</span>
+                {{#}}}
+            </p>
+        </div>
+        {{#if(d.Status==='Settlement'){ }}
+        <div class="action">
+            <input type="checkbox" lay-ignore name="OrderID" data-status="{{d.LoseWinStatus}}" value="{{ d.OrderID}}" />
+            <input type="button" class="layui-btn layui-btn-xs layui-btn-normal" value="过" data-status="Success" />
+            <input type="button" class="layui-btn layui-btn-xs layui-btn-danger" value="拒" data-status="Faild" />
+        </div>
+        {{#}}}
+    </li>
+</script>
+
+
+
+<script type="text/javascript">
+    BW.callback['anchor-trade'] = function (result) {
+        delete BW.callback['anchor-trade']
+        layui.use(['betwin', 'form'], function () {
+            var layui = this,
+                betwin = layui.betwin,
+                form = layui.form,
+                view = layui.view,
+                table = layui.table,
+                admin = layui.admin,
+                laytpl = layui.laytpl,
+                $ = layui.$;
+            var tradeObj = document.getElementById("anchor-trade")
+            var totalObj = document.getElementById("anchor-trade-order-total")
+            var orderObj = document.getElementById("anchor-trade-order")
+
+            Utils.anchor.initBetItem(tradeObj)
+            //对dom操作的函数
+            var dom = {
+                loadBets: function (anchorObj) {
+                    var anchorId = anchorObj.getAttribute("data-anchor")
+                    var headerObj = anchorObj.querySelector(".anchor-item-header");
+                    table.reload("anchor-trade-list-" + anchorId, {
+                        where: {
+                            AnchorID: anchorId,
+                            Index: headerObj.querySelector("[name='Index']").value || 0
+                        }
+                    })
+                },
+                //获取主播
+                getAnchor: function (anchorId) {
+                    admin.req({
+                        url: 'anchor/trade/anchor',
+                        data: { Anchor: anchorId },
+                        success: function (res) {
+                            if (res.success) {
+                                res.info.forEach(anchor => {
+                                    dom.loadAnchor(anchor)
+                                });
+                            }
+                        }
+                    })
+                },
+                loadAnchors: function (data) {
+                    data.forEach(anchor => {
+                        dom.loadAnchor(anchor)
+                    });
+                },
+                //记载表格相关事件
+                loadTableHandle: function (anchor) {
+                    var anchorObj = tradeObj.querySelector(`[data-anchor="${anchor.ID}"]`)
+                    var headerObj = anchorObj.querySelector(".anchor-item-header");
+                    var timeObj = document.getElementById("anchor-trade-index-time-" + anchor.ID)
+                    table.render({
+                        elem: "#anchor-trade-list-" + anchor.ID,
+                        url: 'anchor/trade/bets',
+                        data: {
+                            AnchorID: anchor.ID,
+                        },
+                        height: 770,
+                        done: betwin.table.done,
+                        toolbar: "#anchor-trade-toolbar",
+                        page: false,
+                        cols: [
+                            [{
+                                type: "sort",
+                                field: "ID",
+                                width: 60,
+                                save: function (data) {
+                                    var strId = data.join(',');
+                                    var index = headerObj.querySelector(
+                                        "[name='Index']").value
+                                    admin.req({
+                                        url: "anchor/bet/sort",
+                                        data: {
+                                            Index: index,
+                                            Bets: strId
+                                        }
+                                    })
+                                }
+                            },
+                            {
+                                type: "checkbox",
+                                width: 60
+                            },
+                            {
+                                title: '竞猜项',
+                                templet: '#anchor-trade-item-template',
+                                minWidth: 300
+                            },
+                            {
+                                title: '操作',
+                                templet: '#anchor-trade-tool-template',
+                                width: 100
+                            }
+                            ]
+                        ],
+                        done: function (res) {
+                            res.data.forEach(item => {
+                                dom.updatePay(item.ID)
+                            });
+                            betwin.table.done.apply(this, [res]);
+                        }
+                    })
+
+
+                    if (timeObj != null) {
+                        var datetime = timeObj.getAttribute("value")
+                        setInterval(function () {
+                            timeObj.innerHTML = dom.showtime(datetime);
+                        }, 1000); //反复执行函数本身
+                    }
+                    //表格操作栏
+                    table.on(`toolbar(anchor-trade-list-${anchor.ID})`, function (obj) {
+                        var index = headerObj.querySelector("[name='Index']").value
+                        if (!index) {
+                            layer.msg('请选择期号或创建新期', { icon: 5 })
+                            return;
+                        }
+                        var code = headerObj.querySelector("[name='Index']").querySelector(`[value="${index}"]`).textContent
+                        switch (obj.event) {
+                            case "Result":
+                                admin.popup({
+                                    title: "第" + code + "期赛果录入",
+                                    area: GolbalSetting.area.lg,
+                                    shadeClose: true,
+                                    id: "common-view-result-" + index,
+                                    content: "正在加载...",
+                                    success: function () {
+                                        view(this.id).render(
+                                            "diag/anchor/result-info", {
+                                            Index: index,
+                                            AnchorID: anchor.ID,
+                                        })
+                                    }
+                                });
+                                break;
+                            case "Cancel":
+                                layer.confirm("确认取消，第" + code + "期？", {
+                                    icon: 3,
+                                    title: '提示'
+                                }, function () {
+                                    betwin.admin.req({
+                                        url: 'anchor/index/cancelresult',
+                                        data: {
+                                            AnchorID: anchor.ID,
+                                            Index: index,
+                                        },
+                                        success: (res) => {
+                                            dom.getAnchor(anchor.ID)
+                                        }
+                                    })
+                                })
+                                break;
+                            case "Rule":
+                                admin.popup({
+                                    title: `${anchor.Name}/第${code}期，规则说明`,
+                                    area: GolbalSetting.area.md,
+                                    shadeClose: true,
+                                    id: "common-view-rule-" + index,
+                                    content: "正在加载...",
+                                    success: function () {
+                                        view(this.id).render("diag/anchor/rule", {
+                                            Index: index,
+                                            AnchorID: anchor.ID,
+                                            callback: dom.getAnchor
+                                        })
+                                    }
+                                })
+                                break;
+                            //刷新缓存
+                            case "Cache":
+                                betwin.admin.req({
+                                    url: 'anchor/trade/RefreshIndex',
+                                    data: {
+                                        AnchorID: anchor.ID,
+                                        Index: index
+                                    }
+                                })
+                                break;
+                            //批量显示/隐藏
+                            case "Visible":
+                            case "Hide":
+                                var checkStatus = table.checkStatus(obj.config.id)
+                                var bets = checkStatus.data.map(bet => {
+                                    return bet.ID;
+                                })
+                                if (bets.length === 0) {
+                                    layer.msg(
+                                        '请选择盘口', {
+                                        icon: 5
+                                    })
+                                    return
+                                }
+                                var visible = obj.event === "Visible" ? true : false;
+                                bets.forEach(betId => {
+                                    dom.updateBetClass(betId, !visible, "visible")
+                                });
+                                admin.req({
+                                    url: 'anchor/bet/UpdateBetStatus',
+                                    data: {
+                                        AnchorID: anchor.ID,
+                                        Bet: bets.join(","),
+                                        Value: visible,
+                                        Type: "visible"
+                                    },
+                                    success: function (res) {
+                                        if (!res.success) {
+                                            bets.forEach(betId => {
+                                                dom.updateBetClass(betId, visible, "visible")
+                                            });
+                                        }
+                                    }
+                                })
+                                break;
+                            //锁定/解锁
+                            case "Lock":
+                            case "UnLock":
+                                var checkStatus = table.checkStatus(obj.config.id)
+                                var bets = checkStatus.data.map(bet => {
+                                    return bet.ID;
+                                })
+                                if (bets.length === 0) {
+                                    layer.msg(
+                                        '请选择盘口', {
+                                        icon: 5
+                                    })
+                                    return
+                                }
+                                var lock = obj.event === "Lock" ? true : false;
+                                bets.forEach(betId => {
+                                    dom.updateBetClass(betId, !lock, "lock")
+                                });
+                                admin.req({
+                                    url: 'anchor/bet/UpdateBetStatus',
+                                    data: {
+                                        AnchorID: anchor.ID,
+                                        Bet: bets.join(","),
+                                        Value: lock,
+                                        Type: 'lock'
+                                    },
+                                    success: function (res) {
+                                        if (!res.success) {
+                                            bets.forEach(betId => {
+                                                dom.updateBetClass(betId, lock, "lock")
+                                            });
+                                        }
+                                    }
+                                })
+                                break;
+                            case "Live":
+                            case "UnLive":
+                                var checkStatus = table.checkStatus(obj.config.id)
+                                var bets = checkStatus.data.map(bet => {
+                                    return bet.ID;
+                                })
+                                if (bets.length === 0) {
+                                    layer.msg(
+                                        '请选择盘口', {
+                                        icon: 5
+                                    })
+                                    return
+                                }
+                                admin.req({
+                                    url: 'anchor/bet/updateLive',
+                                    data: {
+                                        Bet: bets.join(","),
+                                        IsLive: obj.event === "Live" ? true : false
+                                    },
+                                    success: function () {
+                                        table.reload(
+                                            `anchor-trade-list-${anchor.ID}`)
+                                    }
+                                })
+                                break;
+                            case "Play":
+                                admin.popup({
+                                    title: `${anchor.ID}/第${code}期 添加玩法`,
+                                    area: GolbalSetting.area.lg,
+                                    shadeClose: true,
+                                    id: "common-view-play-" + index,
+                                    content: "正在加载...",
+                                    success: function () {
+                                        view(this.id).render(
+                                            "diag/anchor/bet-info", {
+                                            Index: index,
+                                            AnchorID: anchor.ID,
+                                            GameID: anchor.GameID
+                                        })
+                                    }
+                                })
+                                break;
+                            case "Search":
+                                dom.loadBets(this.getParent("anchor-item"))
+                                break;
+                            //全部收起
+                            case "AllUp":
+                                var anchorObj = this.getParent("anchor-item")
+                                if (this.innerText === '全部收起') {
+                                    this.innerText = "全部展开"
+                                }
+                                else {
+                                    this.innerText = "全部收起"
+                                }
+                                anchorObj.querySelectorAll("[bet-event='up']").forEach(bet => {
+                                    Utils.anchor.moreBet(bet, this.innerText === "全部展开" ? 0 : 1)
+                                });
+                                break
+                            case "HandicapUp":
+                                if (this.innerText === '让分收起') {
+                                    this.innerText = "让分展开"
+                                }
+                                else {
+                                    this.innerText = "让分收起"
+                                }
+                                var anchorObj = this.getParent("anchor-item")
+                                anchorObj.querySelectorAll("[item-event='more']").forEach(bet => {
+                                    Utils.anchor.moreItem(bet, this.innerText === "让分展开" ? 1 : 0)
+                                });
+                                break
+                        }
+                    })
+
+
+                    //列表中点击事件
+                    table.on(`tool(anchor-trade-list-${anchor.ID})`, function (obj) {
+                        var index = headerObj.querySelector("[name='Index']").value
+                        var code = headerObj.querySelector("[name='Index']").querySelector(`[value="${index}"]`).textContent
+                        var data = obj.data;
+                        var event = obj.event;
+                        switch (event) {
+                            case "copy":
+                                admin.popup({
+                                    title: `${anchor.ID}-复制盘口`,
+                                    area: GolbalSetting.area.lg,
+                                    shadeClose: true,
+                                    id: "common-view-copy-" + index,
+                                    content: "正在加载...",
+                                    success: function () {
+                                        view(this.id).render('diag/anchor/copy', {
+                                            Index: index,
+                                            BetID: data.ID,
+                                            AnchorID: anchor.ID
+                                        })
+                                    }
+                                })
+                                break;
+                            case "result":
+                                admin.popup({
+                                    title: "第" + code + "期赛果录入",
+                                    area: GolbalSetting.area.lg,
+                                    shadeClose: true,
+                                    id: "common-view-result-" + index,
+                                    content: "正在加载...",
+                                    success: function () {
+                                        view(this.id).render(
+                                            "diag/anchor/result-info", {
+                                            Index: index,
+                                            BetID: data.ID,
+                                            AnchorID: anchor.ID
+                                        })
+                                    }
+                                });
+                                break;
+                            case "edit":
+                                UI.manage.keyword({
+                                    type: "Bet",
+                                    content: data.Translate,
+                                    callback: function (res) {
+                                        if (res.length === 0) {
+                                            layer.msg("翻译失败", {
+                                                icon: 5
+                                            })
+                                        } else {
+                                            admin.req({
+                                                url: 'anchor/bet/updatetitle',
+                                                data: {
+                                                    Index: index,
+                                                    BetID: data.ID,
+                                                    Title: JSON.stringify(
+                                                        res[0]
+                                                            .Translate)
+                                                },
+                                                success: function (res) {
+                                                    table.reload(
+                                                        "diag-anchor-trade-list"
+                                                    )
+                                                }
+                                            })
+                                        }
+                                    }
+                                })
+                                break;
+
+                        }
+                    })
+                },
+                //加载主播模板
+                loadAnchor: function (anchor) {
+                    // <button class="layui-btn layui-btn-xs am-icon-dot-circle-o" lay-event="Status"> 状态</button>
+                    var html = [`<div class="anchor-item" data-anchor="${anchor.ID}">
+                        <div class="anchor-item-header ${anchor.IsOnline ? 'layui-bg-cyan' : 'layui-bg-red'}">
+                    <div class="item-remove" title="移除">
+                        <i class=" am-icon-times-circle-o"></i>
+                    </div>
+                    <i class="item-down am-icon-chevron-circle-up" header-event="down" title="查看"></i>
+                    <div class="toolber layui-btn-group">
+                        <button class="layui-btn layui-btn-xs am-icon-plus" lay-event="Create"> 创建新期</button>
+                        <button class="layui-btn layui-btn-xs am-icon-gavel" lay-event="Result"> 赛果</button>
+                        <button class="layui-btn layui-btn-xs am-icon-first-order" lay-event="Order"> 订单</button>
+                        <button class="layui-btn layui-btn-xs am-icon-check" lay-event="Settlement"> 审核</button>
+                        <button class="layui-btn layui-btn-xs am-icon-caret-square-o-right layui-btn-normal"
+                            lay-event="Start" ${anchor.IsOnline ? 'disabled' : ''}> 开 播</button>
+                        <button class="layui-btn layui-btn-xs am-icon-caret-square-o-down layui-btn-danger"
+                            lay-event="Under" ${anchor.IsOnline ? '' : 'disabled'}> 下 播</button>
+                    </div>`]
+                    html.push(`<div class="title">${anchor.ID}/${anchor.Name}</div>`)
+                    html.push(`<div class="date" title="主播开播时间"><span>${htmlFunction.datetime(anchor.StartAt)}</span></div>`)
+                    html.push(`<div class="index">`)
+                    html.push(`<select name="Index" lay-ignore>`)
+                    anchor.Tabs.forEach(item => {
+                        html.push(`<option value="${item.Index}">${item.Code}</option>`)
+                    });
+                    html.push(`</select>`)
+                    html.push(`</div>`)
+                    html.push(`<div class="video" title="视频源"><span class="am-icon-video-camera"></span></div>`)
+                    html.push(`<div class="betlock"><i class="am-icon-bell-o" header-event="down" title="封盘提醒"></i></div>`)
+                    html.push(`<div class="description">`)
+                    if (anchor.IsOnline) {
+                        if (anchor.Bet) {
+                            html.push(`第${anchor.Bet.Code}期，接受投注`)
+                        }
+                        if (anchor.Current) {
+                            html.push(`第${anchor.Current.Code}期`)
+                            if (anchor.Current.IsLive) {
+                                html.push(`滚球中`)
+                            } else if (anchor.Current.IsValid) {
+                                html.push(`有效`)
+                            } else {
+                                html.push(GolbalSetting.enum['ES.Common.Models.Anchor.IndexStatus'][anchor.Current.Status])
+                            }
+                            if (anchor.Current.Status === "Begin" && anchor.Current.StartTime > 0) {
+                                html.push(`倒计时:<span id="anchor-trade-index-time-${anchor.ID}" value="${anchor.Current.StartTime}" class="layui-text-red"></span>`)
+                            } else if (anchor.Current.StartTime > 0) {
+                                html.push(`开始于:${htmlFunction.time(htmlFunction.datetime(anchor.Current.StartTime))[0]}`)
+                            }
+                        } else {
+                            html.push(`主播游戏准备中`)
+                        }
+                    } else {
+                        html.push(`未开播`)
+                    }
+                    html.push(`</div>`)
+                    html.push(`</div>`)
+                    html.push(`<div class="anchor-item-body up">`)
+                    html.push(`<div class="anchor-item-bet"><table class="layui-table" id="anchor-trade-list-${anchor.ID}" lay-filter="anchor-trade-list-${anchor.ID}"></table></div>`)
+                    html.push(`<div class="anchor-item-order">
+                                <div class="layui-card-header">
+                                    <form class="layui-form layui-form-sm"
+                                        lay-fitler="anchor-trade-order-search">
+                                        <div class="layui-form-item">
+                                            <div class="layui-input-inline layui-btn-group auto">
+                                                <input type="checkbox" class="selectAll" lay-ignore  />
+                                                <input type="button" value="过" class="layui-btn layui-btn-xs layui-btn-normal"
+                                                    data-action="Success" />
+                                                <input type="button" value="拒" class="layui-btn layui-btn-xs layui-btn-danger"
+                                                    data-action="Faild" />
+                                            </div>
+                                            <div class="layui-input-inline" style="width:50px;margin-right: 1px;">
+                                                <select name="Status" lay-ignore>
+                                                    <option value="">全部</option>
+                                                    <option value="Wait">未开奖</option>
+                                                    <option value="Settlement">结算中</option>
+                                                </select>
+                                            </div>
+                                            <div class="layui-input-inline" style="width:40px">
+                                                <input type="text" style="width:40px" name="BetID" placeholder="盘口ID" />
+                                            </div>
+                                            <div class="layui-input-inline" style="width:45px">
+                                                <input type="text" style="width:45px" name="User" placeholder="会员名/ID" />
+                                            </div>
+                                            <div class="layui-input-inline layui-btn-group auto">
+                                                <button type="button" class="layui-btn layui-btn-xs  am-icon-search"
+                                                    data-action="Search"></button>
+                                                <button type="reset" class="layui-btn layui-btn-xs layui-btn-primary am-icon-refresh"
+                                                    data-action="Refresh"></button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            <div class="layui-card-body">
+                                <ul style="overflow-x: auto;height: 730px;"></ul>
+                            </div>
+                            <div class="layui-card-footer">
+                                <div class="order-total" id="anchor-trade-order-total">
+                                    <div class="layui-row">
+                                        <div class="layui-col-md4">
+                                            <span>投注：</span>
+                                            <span class="betmoney" value="">0</span>
+                                        </div>
+                                        <div class="layui-col-md5">
+                                            <span>盈亏：</span>
+                                            <span class="money" value="">0.00</span>
+                                        </div>
+                                        <div class="layui-col-md3">
+                                            <span>总量</span>
+                                            <span class="count" value="">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`)
+                    html.push(`</div>`)
+                    html.push(`</div>`)
+                    var anchorObj = tradeObj.querySelector(`.anchor-item[data-anchor="${anchor.ID}"]`)
+                    if (anchorObj) {
+                        anchorObj.innerHTML = html.join("\n")
+                    }
+                    else {
+                        $(tradeObj.querySelector(".anchor-list")).append(html.join("\n"))
+                    }
+                    dom.loadTableHandle(anchor)
+                    dom.loadOrderHandle(anchor)
+                },
+                //加载订单事件
+                loadOrderHandle: function (anchor) {
+                    var anchorObj = tradeObj.querySelector(`.anchor-item[data-anchor="${anchor.ID}"]`)
+                    var orderObj = anchorObj.querySelector(".anchor-item-order")
+                    var ulObj = orderObj.querySelector("ul")
+                    betwin.admin.req({
+                        url: 'anchor/order/list',
+                        data: {
+                            PageSize: 1000,
+                            AnchorID: anchor.ID,
+                            Trade: 1,
+                            Status: orderObj.querySelector("select[name='Status']").value,
+                            BetID: orderObj.querySelector("input[name='BetID']").value,
+                            User: orderObj.querySelector("input[name='User']").value
+                        },
+                        success: function (res) {
+                            ulObj.innerHTML = ""
+                            res.info.list.forEach(item => {
+                                laytpl(document.getElementById("anchor-trade-order-template").innerHTML).render(item, html => {
+                                    $(ulObj).append(html)
+                                })
+                            });
+                            var betmoneyObj = orderObj.querySelector(".betmoney");
+                            var moneyObj = orderObj.querySelector('.money');
+                            var countObj = orderObj.querySelector(".count")
+                            betmoneyObj.innerHTML = res.info.data.BetMoney
+                            betmoneyObj.setAttribute("value", res.info.data.BetMoney)
+                            moneyObj.innerHTML = `<span class=${res.info.data.Money > 0 ? "layui-text-green" : "layui-text-red"}>${res.info.data.Money}</span>`
+                            moneyObj.setAttribute("value", res.info.data.Money)
+                            countObj.innerHTML = res.info.RecordCount
+                            countObj.setAttribute("value", res.info.RecordCount)
+                        }
+                    })
+                },
+
+                updateBetLock: function (data) {
+                    data.forEach(item => {
+                        for (var betId in item.Bets) {
+                            dom.updateBetClass(betId, item.Bets[betId] === 1 ? false : true, "lock")
+                        }
+                        var anchorObj = tradeObj.querySelector(`[data-anchor="${item.AnchorID}"]`)
+                        if (anchorObj) {
+                            var betLockObj = anchorObj.querySelector(".betlock>i")
+                            betLockObj.classList.add("on")
+                        }
+                    })
+                },
+                updateBetVisible: function (data) {
+                    data.forEach(item => {
+                        for (var betId in item.Bets) {
+                            dom.updateBetClass(betId, item.Bets[betId] === 1 ? false : true, "visible")
+                        }
+                    })
+                },
+                //修改盘口隐藏、锁定样式变化
+                updateBetClass: function (betId, value, type) {
+                    var betObj = tradeObj.querySelector(`.bet-status>[data-betid="${betId}"][status-event="${type}"]`);
+                    if (!betObj) return
+                    Utils.anchor.setBetItemStatus(betObj, type, value)
+                },
+                // 修改竞猜项赔率
+                updateOdds: function (data) {
+                    Utils.GetOdds(data).forEach(item => {
+                        for (var itemId in item.Item) {
+                            var oddsObj = tradeObj.querySelector(`input[data-itemid="${itemId}"]`);
+                            Utils.anchor.setOdds(oddsObj, item.Item[itemId])
+                        }
+                    });
+                },
+                //修改竞猜项锁定
+                updateItemLock: function (data) {
+                    data.forEach(item => {
+                        for (var im in item.Items) {
+                            dom.updateItemClass(im, item.Items[im] === 1 ? false : true, "lock")
+                        }
+                    });
+                },
+                //修改竞猜项显示状态
+                updateItemVisible: function (data) {
+                    data.forEach(item => {
+                        for (var im in item.Items) {
+                            dom.updateItemClass(im, item.Items[im] === 1 ? false : true, "visible")
+                        }
+                    });
+                },
+                //修改投注项隐藏、锁定样式变化
+                updateItemClass: function (itemId, value, type) {
+                    var itemObj = tradeObj.querySelector(`.item-status>[data-itemid="${itemId}"][status-event="${type}"]`)
+                    if (!itemObj) return;
+                    Utils.anchor.setBetItemStatus(itemObj, type, value)
+                },
+                // 统计投注项数据
+                statistics: function (data) {
+                    data.forEach(item => {
+                        dom.updateItemStatistics(item)
+                    });
+                },
+                //修改统计金额
+                updateItemStatistics: function (item) {
+                    var itemObj = tradeObj.querySelector(`[data-statistics="${item.ItemID}"]`)
+                    if (!itemObj) return
+                    var html = `<p data-type='bet'>投注:${item.BetMoney}</p><p data-type='reward'>派奖:${item.Reward}</p><p data-type='odds'>赔率:${item.Odds}</p>`
+                    itemObj.parentNode.setAttribute("lay-tips", html)
+                    if (itemObj.hasAttribute("data-betmoney")) {
+                        itemObj.setAttribute("data-betmoney", item.BetMoney)
+                        itemObj.setAttribute("data-reward", item.Reward)
+                        itemObj.setAttribute("data-odds", item.Odds)
+                        dom.updatePay(item.BetID);
+                    } else {
+                        itemObj.innerHTML = item.BetMoney
+                    }
+                },
+                // 修改赔付值
+                updatePay: function (betId) {
+                    var betObj = tradeObj.querySelector(`[data-betid="${betId}"]`);
+                    if (!betObj) return;
+                    var setting = Utils.anchor.getBetSetting(betObj, "object")
+                    if (!setting) return;
+                    betObj.querySelector("tbody").querySelectorAll("tr").forEach(tr => {
+                        var betMoney = 0;
+                        tr.querySelectorAll("[data-betmoney]").forEach(t => {
+                            betMoney += Number(t.getAttribute("data-betmoney") || 0);
+                        });
+                        tr.querySelectorAll("[data-type='pay']").forEach(t => {
+                            var pay = Number(t.getAttribute("data-reward")) - betMoney;
+                            if (pay != 0 && pay > 0) {
+                                t.classList.add("layui-text-green")
+                            } else if (pay != 0 && pay < 0) {
+                                t.classList.add("layui-text-red")
+                            }
+                            t.innerText = htmlFunction.number(pay, 0);
+                        });
+                    })
+                },
+                // 订单列表
+                orders: function (data) {
+                    console.log(data)
+                    data.forEach(item => {
+                        console.log(item)
+                        var anchorObj = tradeObj.querySelector(`[data-anchor="${item.AnchorID}"]`)
+                        if (anchorObj) {
+                            var ulObj = anchorObj.querySelector("ul")
+                            laytpl(document.getElementById("anchor-trade-order-template").innerHTML).render(item, html => {
+                                $(ulObj).prepend(html)
+                            })
+                        }
+                    });
+                },
+                //统计订单列表总计
+                orderTotal: function (order) {
+                    var betmoneyObj = totalObj.querySelector(".betmoney");
+                    var betmoney = Number(betmoneyObj.getAttribute("value")) + order.BetMoney;
+                    betmoneyObj.innerText = betmoney
+                    betmoneyObj.setAttribute("value", betmoney)
+                    var countObj = totalObj.querySelector(".count")
+                    var count = Number(countObj.getAttribute("value")) + 1;
+                    countObj.innerText = count;
+                    countObj.setAttribute("value", count)
+                },
+                //动态加载让分盘
+                loadHandicapItem: function (betObj, items) {
+                    if (!items) return
+                    var betId = betObj.getAttribute("data-betId")
+                    var setting = Utils.anchor.getBetSetting(betObj, "object")
+                    var handicap = Utils.anchor.getHandicap(betObj, "object")
+                    var template = Utils.anchor.getBetTemplate(betObj, "object")
+                    betObj.querySelector("tbody").innerHTML = UI.anchor.tbodyItem(items, setting, handicap, "trade")
+                },
+                //加载当前时间
+                loadTime: function () {
+                    setInterval(() => {
+                        var timeObj = document.getElementById("anchor-trade-time")
+                        if (!timeObj) return;
+                        timeObj.innerText = htmlFunction.datetime(new Date())
+                    }, 1000)
+                },
+                //修改盘口竞猜项
+                updateBetItem: function (bets) {
+                    bets.forEach(bet => {
+                        console.log(bet)
+                        var betObj = tradeObj.querySelector(`.bet-item[data-betid="${bet.ID}"]`)
+                        if (!betObj) return;
+                        Utils.anchor.setHandicap(betObj, bet.Handicap)
+                        dom.loadHandicapItem(betObj, bet.Items)
+                    })
+                },
+                //显示倒计时
+                showtime: function (datetime) {
+                    var nowtime = new Date(), //获取当前时间
+                        endtime = new Date(Number(datetime)); //定义结束时间
+                    var lefttime = endtime.getTime() - nowtime.getTime(), //距离结束时间的毫秒数
+                        leftd = Math.floor(lefttime / (1000 * 60 * 60 * 24)), //计算天数
+                        lefth = Math.floor(lefttime / (1000 * 60 * 60) % 24), //计算小时数
+                        leftm = Math.floor(lefttime / (1000 * 60) % 60), //计算分钟数
+                        lefts = Math.floor(lefttime / 1000 % 60); //计算秒数
+                    if (lefth < 0 && leftm < 0 && lefts < 0) return "比赛即将开始"
+                    return lefth + ":" + leftm + ":" + lefts; //返回倒计时的字符串
+                },
+                //实时加载盘口投注项赔率
+                loadOdds: function (trObj) {
+                    var rebateObj = trObj.querySelector(".bet-setting[name='Rebate']")
+                    var rebate = rebateObj.value
+                    var oldrebate = rebateObj.getAttribute('old-value')
+                    var itemObj = trObj.querySelector(".bet-item");
+                    var items = itemObj.querySelectorAll("input.odds");
+                    if (items.length < 1) return;
+                    var winrate = oldrebate / Number(items[0].value)
+                    items.forEach((item, index) => {
+                        if (items.length == 2 && index == 1) {
+                            item.value = rebate / (1 - winrate)
+                        } else {
+                            item.value = rebate / winrate
+                        }
+                        if (item.value > 2) {
+                            item.classList.remove("layui-text-green")
+                            item.classList.add("layui-text-red")
+                        } else {
+                            item.classList.remove("layui-text-red")
+                            item.classList.add("layui-text-green")
+                        }
+                    });
+                    rebateObj.setAttribute("old-value", rebate)
+                },
+                //订单审核
+                checkOrder(orders, status) {
+                    switch (status) {
+                        case "Success":
+                            betwin.admin.req({
+                                url: 'anchor/order/checkorder',
+                                data: {
+                                    Orders: JSON.stringify(orders),
+                                    Action: "CheckAgree"
+                                },
+                                success: function () {
+                                    //审核之后移除元素
+                                    for (var item in orders) {
+                                        tradeObj.querySelector("input[value='" + item +
+                                            "']").parentNode.parentNode
+                                            .remove()
+                                    }
+
+                                }
+                            })
+                            break;
+                        case "Faild":
+                            var html = []
+                            html.push(`<select name="Reason" style="height: 30px;padding: 0px;display: block;width: 100%;border: 1px solid #ddd;border-radius: 2px;">`)
+                            html.push(`<option value="">请选择理由</option>`)
+                            for (var item in GolbalSetting.enum['Tag.RevokeReason']) {
+                                html.push(`<option value="${item}">${GolbalSetting.enum['Tag.RevokeReason'][item]}</option>`)
+                            }
+                            html.push("</select>")
+                            layer.open({
+                                title: '退单理由',
+                                content: html.join("\n"),
+                                yes: function (index, elem) {
+                                    layer.close(index);
+                                    var data = elem[0].getField()
+                                    if (!data.Reason) {
+                                        layer.alert("请选择退单理由", { icon: 2 });
+                                    }
+                                    data["Orders"] = JSON.stringify(orders);
+                                    data["Action"] = "CheckReject"
+                                    betwin.admin.req({
+                                        url: 'anchor/order/checkorder',
+                                        data: data,
+                                        success: function (res) {
+                                            //审核之后移除元素
+                                            for (var item in orders) {
+                                                tradeObj.querySelector("input[value='" + item +
+                                                    "']").parentNode.parentNode
+                                                    .remove()
+                                            }
+                                        }
+                                    })
+                                }
+                            });
+                            break;
+                    }
+                }
+            }
+            dom.loadTime()
+            dom.loadAnchors(result.info)
+            //下拉主播模块卡
+            $(tradeObj).on("click", "[header-event]", function (e) {
+                var event = e.target.getAttribute("header-event")
+                switch (event) {
+                    case "down":
+                        e.target.classList.remove("on")
+                        var anchorObj = e.target.getParent("anchor-item")
+                        var anchorId = anchorObj.getAttribute("data-anchor")
+                        var downObj = anchorObj.querySelector(".item-down");
+                        if (downObj.classList.contains("am-icon-chevron-circle-up")) {
+                            downObj.classList.add('am-icon-chevron-circle-down')
+                            downObj.classList.remove('am-icon-chevron-circle-up')
+                            anchorObj.querySelector(".anchor-item-body").classList.add("down")
+                            anchorObj.querySelector(".anchor-item-body").classList.remove("up")
+                            dom.loadBets(anchorObj)
+
+                        } else {
+                            downObj.classList.add('am-icon-chevron-circle-up')
+                            downObj.classList.remove('am-icon-chevron-circle-down')
+                            anchorObj.querySelector(".anchor-item-body").classList.remove("down")
+                            anchorObj.querySelector(".anchor-item-body").classList.add("up")
+                        }
+                        break;
+                }
+
+            });
+            //移除操盘主播
+            $(tradeObj).on("click", ".item-remove", function (e) {
+                var anchorObj = e.target.getParent("anchor-item")
+                var anchorId = anchorObj.getAttribute("data-anchor")
+                anchorObj.remove()
+                admin.req({
+                    url: 'anchor/trade/delete',
+                    data: {
+                        AnchorID: anchorId
+                    },
+                })
+            })
+            //添加主播事件
+            $(tradeObj).on("click", "[add-anchor-event]", function () {
+                admin.popup({
+                    title: `添加主播`,
+                    area: GolbalSetting.area.xl,
+                    shadeClose: true,
+                    id: "common-view-anchor-add",
+                    content: "正在加载...",
+                    success: function () {
+                        view(this.id).render("anchor/add", {
+                            callback: dom.getAnchor
+                        })
+                    }
+                })
+            })
+            //主播操作按钮
+            $(tradeObj).on("click", ".toolber>button", function (e) {
+                var anchorObj = e.target.getParent("anchor-item")
+                var anchorId = anchorObj.getAttribute("data-anchor")
+                var headerObj = anchorObj.querySelector(".anchor-item-header");
+                var index = headerObj.querySelector("[name='Index']").value
+                var code = headerObj.querySelector("[name='Index']").textContent
+                var event = e.target.getAttribute("lay-event")
+                switch (event) {
+                    case "Create":
+                        admin.popup({
+                            title: `${anchorId}-创建期号`,
+                            area: GolbalSetting.area.lg,
+                            shadeClose: true,
+                            id: "common-view-index-" + anchorId,
+                            content: "正在加载...",
+                            success: function () {
+                                view(this.id).render("diag/anchor/create", {
+                                    AnchorID: anchorId,
+                                    Index: index,
+                                    GameID: 0,
+                                    callback: dom.getAnchor
+                                })
+                            }
+                        });
+                        break;
+                    case "Result":
+                        admin.popup({
+                            title: `${anchorId}/赛果列表`,
+                            area: GolbalSetting.area.lg,
+                            shadeClose: true,
+                            id: "common-view-bet-" + anchorId,
+                            content: "正在加载...",
+                            success: function () {
+                                view(this.id).render("diag/anchor/bet", {
+                                    AnchorID: anchorId,
+                                    callback: dom.getAnchor
+                                })
+                            }
+                        })
+                        break;
+                    case "Status":
+                        admin.popup({
+                            title: `${anchorId}/ 状态配置`,
+                            area: GolbalSetting.area.xs,
+                            shadeClose: true,
+                            id: `common-view-status-` + anchorId,
+                            content: "正在加载...",
+                            success: function () {
+                                view(this.id).render("diag/anchor/status", {
+                                    AnchorID: anchorId,
+                                    callback: dom.getAnchor
+                                })
+                            }
+                        })
+                        break;
+                    case "Start":
+                        admin.popup({
+                            title: `${anchorId}/ 开播`,
+                            area: GolbalSetting.area.md,
+                            shadeClose: true,
+                            id: `common-view-start-${anchorId}`,
+                            content: "正在加载...",
+                            success: function () {
+                                view(this.id).render("diag/anchor/start", {
+                                    AnchorID: anchorId,
+                                    callback: dom.getAnchor
+                                })
+                            }
+                        })
+                        break;
+                    case "Under":
+                        layer.confirm("确定下播？", {
+                            icon: 3,
+                            title: '提示'
+                        }, function (index) {
+                            betwin.admin.req({
+                                url: 'anchor/info/Under',
+                                data: {
+                                    AnchorID: anchorId,
+                                },
+                                success: function () {
+                                    dom.getAnchor(anchorId)
+                                }
+                            })
+                            layer.close(index)
+                        })
+                        break;
+                    case "Order":
+                        admin.popup({
+                            title: `${anchorId}/ 订单列表`,
+                            area: GolbalSetting.area.full,
+                            shadeClose: true,
+                            id: `common-view-order-${anchorId}`,
+                            content: "正在加载...",
+                            success: function () {
+                                view(this.id).render("orders/anchor/index", {
+                                    AnchorID: anchorId,
+                                })
+                            }
+                        })
+                        break;
+                    case "Settlement":
+                        admin.popup({
+                            title: `${anchorId}/ 订单审核`,
+                            area: GolbalSetting.area.full,
+                            shadeClose: true,
+                            id: `common-view-settlement-${anchorId}`,
+                            content: "正在加载...",
+                            success: function () {
+                                view(this.id).render("anchor/order", {
+                                    AnchorID: anchorId,
+                                })
+                            }
+                        })
+                        break;
+
+                }
+
+            })
+            //主播头部操作
+            $(tradeObj).on("change", ".anchor-item-header", function (e) {
+                dom.loadBets(e.target.getParent("anchor-item"))
+            })
+            //视频事件
+            $(tradeObj).on("click", ".video>span", function (e) {
+                var anchorObj = e.target.getParent("anchor-item")
+                var anchorId = anchorObj.getAttribute("data-anchor")
+                admin.popup({
+                    title: `${anchorId} / 视频源`,
+                    area: GolbalSetting.area.xl,
+                    shadeClose: true,
+                    id: "common-view-video-" + anchorId,
+                    content: "正在加载...",
+                    success: function () {
+                        view(this.id).render("diag/anchor/video", {
+                            AnchorID: anchorId,
+                        })
+                    }
+                })
+            });
+            // 赔率变更
+            $(tradeObj).on("change", "input.odds", e => {
+                var itemId = e.target.getAttribute("data-itemid");
+                var betObj = e.target.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
+                var items = betObj.querySelectorAll(".odds");
+                items.forEach(item => {
+                    item.setAttribute("disabled", "disabled")
+                })
+                $.ajax({
+                    url: "Anchor/bet/UpdateOdds",
+                    method: "post",
+                    data: {
+                        ItemID: itemId,
+                        Odds: e.target.value
+                    },
+                    headers: layui.data("layuiAdmin"),
+                    success: function (res) {
+                        if (res.success) {
+                            for (var itemId in res.info) {
+                                var oddsObj = tradeObj.querySelector(`input[data-itemid="${itemId}"]`);
+                                Utils.anchor.setOdds(oddsObj, res.info[itemId])
+                            }
+                        }
+                        else {
+                            layer.msg(res.msg, { icon: 5 })
+                            Utils.anchor.setOdds(e.target, e.target.getAttribute("old-value"))
+                        }
+                    },
+                    error: function (res) {
+                        layer.msg(res.statusText, { icon: 5 })
+                        Utils.anchor.setOdds(e.target, e.target.getAttribute("old-value"))
+                    },
+                    complete: function () {
+                        items.forEach(item => {
+                            item.removeAttribute("disabled")
+                        })
+                    }
+                })
+            });
+            //盘口的锁定与显示
+            $(tradeObj).on("click", ".bet-status>button", function (e) {
+                var betId = e.target.getAttribute("data-betid");
+                var event = e.target.getAttribute("status-event");
+                var value = Number(e.target.getAttribute("value"))
+                Utils.anchor.setBetItemStatus(e.target, event, value)
+                switch (event) {
+                    case "visible":
+                        admin.req({
+                            url: "anchor/bet/updatebetvisible",
+                            data: {
+                                BetID: betId,
+                                IsVisible: value ? false : true
+                            },
+                            success: function (res) {
+                                if (!res.success) {
+                                    Utils.anchor.setBetItemStatus(e.target, event, value)
+                                }
+                            }
+                        })
+                        break;
+                    case "lock":
+                        admin.req({
+                            url: "anchor/bet/updatebetlock",
+                            data: {
+                                BetID: betId,
+                                IsLock: value ? false : true
+                            },
+                            success: function (res) {
+                                if (!res.success) {
+                                    Utils.anchor.setBetItemStatus(e.target, event, value)
+                                }
+                            }
+                        })
+                        break;
+                }
+            })
+            //投注项的锁定与显示
+            $(tradeObj).on("click", ".item-status>button", function (e) {
+                var itemId = e.target.getAttribute("data-itemid");
+                var event = e.target.getAttribute("status-event");
+                var value = Number(e.target.getAttribute("value"))
+                Utils.anchor.setBetItemStatus(e.target, event, value)
+                switch (event) {
+                    case "visible":
+                        admin.req({
+                            url: 'anchor/bet/updateitemvisible',
+                            data: {
+                                ItemID: itemId,
+                                IsVisible: value ? false : true
+                            },
+                            success: function (res) {
+                                if (!res.success) {
+                                    Utils.anchor.setBetItemStatus(e.target, event, value)
+                                }
+                            }
+                        })
+                        break;
+                    case "lock":
+                        admin.req({
+                            url: 'anchor/bet/updateitemlock',
+                            data: {
+                                ItemID: itemId,
+                                IsLock: value ? false : true
+                            },
+                            success: function (res) {
+                                if (!res.success) {
+                                    Utils.anchor.setBetItemStatus(e.target, event, value)
+                                }
+                            }
+                        })
+                        break;
+                }
+            })
+
+            //竞猜项组的锁定与显示
+            $(tradeObj).on("click", ".item-group-status>button", function (e) {
+                var betObj = e.target.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
+                var itemId = e.target.getAttribute("data-itemid");
+                var event = e.target.getAttribute("status-event");
+                var value = Number(e.target.getAttribute("value"))
+                var betId = betObj.getAttribute("data-betid")
+                Utils.anchor.setBetItemStatus(e.target, event, value)
+                itemId.split(",").forEach(item => {
+                    dom.updateItemClass(item, value, event)
+                });
+                admin.req({
+                    url: 'anchor/trade/updateitemstatus',
+                    data: {
+                        BetID: betId,
+                        Item: itemId,
+                        Value: value ? false : true,
+                        Type: event
+                    },
+                    success: function (res) {
+                        if (!res.success) {
+                            Utils.anchor.setBetItemStatus(e.target, event, value)
+                        }
+                    },
+                    complete: function () {
+
+                    }
+                })
+            })
+            //操作模型配置
+            $(tradeObj).on("change", ".template", function (e) {
+                var betObj = e.target.parentNode.parentNode.parentNode.parentNode;
+                var template = Utils.anchor.getBetTemplate(betObj)
+                e.target.setAttribute("disabled", "disabled")
+                var betId = betObj.getAttribute("data-betid")
+                $.ajax({
+                    url: 'anchor/bet/updatesetting',
+                    method: 'post',
+                    data: {
+                        BetID: betId,
+                        Template: template
+                    },
+                    headers: layui.data("layuiAdmin"),
+                    success: function (res) {
+                        if (!res.success) {
+                            if (e.target.getAttribute("date-template") === "Rebate") {
+                                e.target.value = e.target.getAttribute("old-value")
+                            }
+                        }
+                    },
+                    error: function (res) {
+                        if (e.target.getAttribute("date-template") === "Rebate") {
+                            e.target.value = e.target.getAttribute("old-value")
+                        }
+                    }, complete: function () {
+                        e.target.removeAttribute("disabled")
+                    }
+                })
+            })
+
+            //编辑让分盘口参数
+            $(tradeObj).on("change", ".handicap>input", function (e) {
+                var betObj = e.target.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
+                var betId = betObj.getAttribute("data-betId")
+                var handicap = Utils.anchor.getHandicap(betObj)
+                e.target.setAttribute("disabled", "disabled")
+                $.ajax({
+                    url: 'anchor/bet/updatehandicap',
+                    method: 'post',
+                    data: {
+                        BetID: betId,
+                        Handicap: handicap
+                    },
+                    headers: layui.data("layuiAdmin"),
+                    success: function (res) {
+                        if (res.success) {
+                            dom.loadHandicapItem(betObj, res.info.Items)
+                        }
+                        else {
+                            layer.msg(res.msg, { icon: 5 })
+                            e.target.value = e.target.getAttribute("old-value")
+                        }
+                    },
+                    error: function () {
+                        e.target.value = e.target.getAttribute("old-value")
+                    },
+                    complete: function () {
+                        e.target.removeAttribute("disabled")
+                    }
+                })
+            })
+
+
+            //批量操作订单
+            $(tradeObj).on("click", '[data-action]', function () {
+                var action = this.getAttribute("data-action")
+                var orderObj = this.getParent("anchor-item")
+                var anchorId = orderObj.getAttribute("data-anchor")
+                switch (action) {
+                    case "Success":
+                    case "Faild":
+                        var list = orderObj.querySelectorAll(
+                            ".Settlement input[name='OrderID']:checked");
+                        if (!list.length) {
+                            layer.alert("没有选中需要操作的订单", {
+                                icon: 2
+                            });
+                            return;
+                        }
+                        var orders = []
+                        list.forEach(item => {
+                            orders.push(item.value)
+                        });
+                        dom.checkOrder(orders, action)
+                        break;
+                    case "Search":
+                        dom.loadOrderHandle({ ID: anchorId })
+                        break;
+                }
+
+            });
+
+            //单个提前退单
+            $(tradeObj).on("click", "[revoke-event]", function (e) {
+                var orderId = e.target.getAttribute("revoke-event")
+                var html = []
+                html.push(`<select name="Reason" style="height: 30px;padding: 0px;display: block;width: 100%;border: 1px solid #ddd;border-radius: 2px;">`)
+                html.push(`<option value="">请选择理由</option>`)
+                for (var item in GolbalSetting.enum['Tag.RevokeReason']) {
+                    html.push(`<option value="${item}">${GolbalSetting.enum['Tag.RevokeReason'][item]}</option>`)
+                }
+                html.push("</select>")
+                layer.open({
+                    title: '退单理由',
+                    content: html.join("\n"),
+                    yes: function (index, elem) {
+                        layer.close(index);
+                        var data = elem[0].getField()
+                        if (!data.Reason) {
+                            layer.alert("请选择退单理由", { icon: 2 });
+                            return false;
+                        }
+                        data["Orders"] = JSON.stringify([orderId]);
+                        betwin.admin.req({
+                            url: 'anchor/order/RevokeOrder',
+                            data: data,
+                            success: function (res) {
+                                e.target.remove()
+                            }
+                        })
+                    }
+                });
+            })
+            //单个点击审核和退单
+            $(tradeObj).on("click", "[data-status]", function () {
+                var event = this.getAttribute("data-status")
+                var orderId = this.parentNode.parentNode.querySelector("input[name='OrderID']").value
+                dom.checkOrder([orderId], event)
+            })
+            // 全选按鈕
+            $(tradeObj).on("click", ".selectAll", function () {
+                var orderObj = this.getParent("anchor-item")
+                var checked = this.checked;
+                var list = orderObj.querySelectorAll("input[name='OrderID']");
+                for (var i = 0; i < list.length; i++) {
+                    list[i].checked = checked;
+                }
+            })
+            // 获取 WebSocket 推送频道
+            betwin.admin.req({
+                url: "anchor/trade/Channel",
+                success: res => {
+                    var callback = {};
+                    var channel = res.info.Channel.toObject(t => t, t => t);
+                    // 主播订阅
+                    callback["Anchor"] = function (message) {
+                        if (message.message) message = JSON.parse(message.message);
+                        switch (message.Action) {
+                            case "BetLockMessage":
+                                dom.updateBetLock(message.Data);
+                                break;
+                            case "BetVisibleMessage":
+                                dom.updateBetVisible(message.Data);
+                                break;
+                            case "OddsMessage":
+                                dom.updateOdds(message.Data);
+                                break;
+                            case "ItemLockMessage":
+                                dom.updateItemLock(message.Data)
+                                break;
+                            case "ItemVisibleMessage":
+                                dom.updateItemVisible(message.Data)
+                                break;
+                            case "BetMessage":
+                                dom.updateBetItem(message.Data);
+                                break;
+                        }
+                    };
+                    callback["Anchor.System"] = function (message) {
+                        if (message.message) message = JSON.parse(message.message);
+                        switch (message.Action) {
+                            case "StatisticsMessage":
+                                dom.statistics(message.Data);
+                                break;
+                            case "OrderMessage":
+                                dom.orders(message.Data);
+                                break;
+                        }
+                    }
+
+                    layui.$.getScript("/studio/js/pusher-1.0.1.js", function () {
+                        Utils.Subscribe(res.info.Setting, channel, callback);
+                    });
+
+                }
+            });
+
+        })
+    }
+    BW.callback['anchor-trade-admin'] = function () {
+        delete BW.callback['anchor-trade-admin']
+        layui.use(['betwin'], function () {
+            var layui = this,
+                betwin = layui.betwin;
+            betwin.admin.popup("#anchor-trade-header");
+        })
+    }
+</script>

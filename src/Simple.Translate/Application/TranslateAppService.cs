@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Newtonsoft.Json;
 using Simple.Core.Dapper;
 using Simple.Core.Domain;
 using Simple.Core.Domain.Enums;
@@ -23,7 +24,6 @@ namespace Simple.Translate.Application
         }
         private long GetKey(string word)
         {
-            word = word.Replace("~", "");
             return SHA256Encryption.GetLongHashCode(word);
         }
 
@@ -55,7 +55,6 @@ namespace Simple.Translate.Application
                 {
                     text ??= new TranslateContent();
                     string content = db.FirstOrDefault<TranslateWord, string>(c => c.Word == key && c.Language == language, c => c.Content);
-                    translate[LanguageType.CHN] = word.Replace("~", "");
                     translate[language] = content;
                     if (string.IsNullOrWhiteSpace(content))
                     {
@@ -69,7 +68,7 @@ namespace Simple.Translate.Application
                                 Word = key
                             });
                         }
-                        content = Online(LanguageType.CHN, language, word.Replace("~", ""));
+                        content = Online(LanguageType.CHN, language, word);
                         translate[language] = content;
                         if (db.Any<TranslateWord>(c => c.Word == key && c.Language == language))
                         {
@@ -147,6 +146,29 @@ namespace Simple.Translate.Application
                 });
             }
             return Logger.Log("创建频道");
+        }
+
+
+        public void SaveWord(List<string> words)
+        {
+            using (IDapperDatabase db = CreateDatabase(IsolationLevel.ReadUncommitted))
+            {
+                foreach (var key in words)
+                {
+                    long word = GetKey(key);
+                    if (!db.Any<TranslateWord>(c => c.Word == word && c.Language == LanguageType.CHN))
+                    {
+                        db.Insert(new TranslateWord
+                        {
+                            Word = word,
+                            Language = LanguageType.CHN,
+                            Content = key,
+                            CreateAt = DateTime.Now,
+                        });
+                    }
+                }
+                db.Commit();
+            }
         }
 
         public bool SaveContent(Guid channel, long word, LanguageType language, string content)
