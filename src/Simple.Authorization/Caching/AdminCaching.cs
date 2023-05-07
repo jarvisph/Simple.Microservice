@@ -1,8 +1,9 @@
-﻿using Simple.Authorization.Entity.Model.Admin;
+﻿using Newtonsoft.Json;
+using Simple.Authorization.Entity;
 using Simple.Redis;
 using StackExchange.Redis;
 
-namespace Simple.Authorization.Application.Caching
+namespace Simple.Authorization.Caching
 {
     internal class AdminCaching : RedisDatabase, IAdminCaching
     {
@@ -28,6 +29,7 @@ namespace Simple.Authorization.Application.Caching
                 yield return item.GetRedisValue<string>();
             }
         }
+        public new int GetTokenID(string token) => base.GetTokenID(token);
         public void SavePermission(int roleId, IEnumerable<string> permissions)
         {
             string key = ADMIN_PERMISSION + roleId;
@@ -45,14 +47,16 @@ namespace Simple.Authorization.Application.Caching
             Redis.KeyDelete(key);
         }
 
-        public AdminRedis GetAdminInfo(int adminId)
+        public Admin GetAdminInfo(int adminId)
         {
-            return Redis.HashGet(ADMIN_INFO, adminId);
+            RedisValue value = Redis.HashGet(ADMIN_INFO, adminId);
+            if (value.IsNullOrEmpty) return null;
+            return JsonConvert.DeserializeObject<Admin>(value.GetRedisValue<string>());
         }
 
-        public void SaveAdminInfo(AdminRedis admin)
+        public void SaveAdminInfo(Admin admin)
         {
-            Redis.HashSet(ADMIN_INFO, admin.ID, admin);
+            Redis.HashSet(ADMIN_INFO, admin.ID, JsonConvert.SerializeObject(admin));
         }
 
         public bool CheckPermission(int adminId, string permission)
@@ -75,6 +79,6 @@ namespace Simple.Authorization.Application.Caching
             return Redis.HashDelete(ADMIN_TOKEN, adminId);
         }
 
-
+        string IAdminCaching.Login(int adminId) => base.Login(adminId);
     }
 }

@@ -1,24 +1,21 @@
-﻿using Simple.Authorization.Application.Caching;
-using Simple.Authorization.Entity.DB;
-using Simple.Authorization.Entity.Model.Admin;
+﻿using Simple.Authorization.Caching;
+using Simple.Authorization.Entity;
+using Simple.Authorization.Interface;
 using Simple.Core.Dapper;
+using Simple.Core.Domain;
 using Simple.Core.Domain.Enums;
 using Simple.Core.Encryption;
-using Simple.Core.Extensions;
 using Simple.Core.Helper;
 using Simple.Core.Logger;
-using Simple.Web.Jwt;
-using System.Security.Claims;
+using System.Data;
 
-namespace Simple.Authorization.Application.Services
+namespace Simple.Authorization.Services
 {
-    public class AdminAppService : AuthorizationAppServiceBase, IAdminAppService
+    public class AdminAppService : ServiceBase, IAdminAppService
     {
-        private readonly JWTOption _options;
         private readonly IAdminCaching _adminCaching;
-        public AdminAppService(JWTOption option, IAdminCaching adminCaching)
+        public AdminAppService(IAdminCaching adminCaching)
         {
-            _options = option;
             _adminCaching = adminCaching;
         }
         public bool DeleteAdminInfo(int adminId)
@@ -47,77 +44,71 @@ namespace Simple.Authorization.Application.Services
         }
         public bool Login(string username, string password, long time, string code, out string token)
         {
-            if (!CheckHelper.CheckUserName(username, out string msg)) throw new MessageException(msg);
-            if (!CheckHelper.CheckPassword(password, out msg)) throw new MessageException(msg);
-            password = password.ToUpper();
-            using (IDapperDatabase db = CreateDatabase())
+            token = string.Empty;
+            if (!CheckHelper.CheckUserName(username, out string message)) throw new MessageException(message);
+            if (!CheckHelper.CheckPassword(password, out message, 8, 16)) throw new MessageException(message);
+            Admin admin;
+            using (IDapperDatabase db = CreateDatabase(IsolationLevel.ReadUncommitted))
             {
-                token = password;
-                if (!db.Any<Admin>())
+                if (db.Count<Admin>() == 0)
                 {
-                    long timestamp = DateTime.Now.GetTimestamp();
-                    string encryption = MD5Encryption.Encryption(password);
-                    db.Insert(new Admin
+                    long createAt = WebAgent.GetTimestamps();
+                    db.InsertIdentity(new Admin
                     {
                         AdminName = username,
-                        CreateAt = timestamp,
-                        NickName = "超级管理员",
-                        Password = PwdEncryption.Encryption(encryption, timestamp),
-                        IsAdmin = true
+                        CreateAt = createAt,
+                        LoginIP = IPHelper.IP,
+                        Password = PwdEncryption.Encryption(password, createAt),
+                        Status = UserStatus.Normal
                     });
                 }
-                else
+                admin = db.FirstOrDefault<Admin>(c => c.AdminName == username);
+                if (admin == null) throw new MessageException("管理员不存在");
+                if (admin.Status != UserStatus.Normal) throw new MessageException("管理员已禁止登录");
+                if (admin.Password != PwdEncryption.Encryption(password, admin.CreateAt))
                 {
-                    Admin admin = db.FirstOrDefault<Admin>(c => c.AdminName == username);
-                    if (admin == null) throw new MessageException("登录名不存在");
-                    if (admin.Status != UserStatus.Normal) throw new MessageException("管理员状态有误，请联系超级管理员");
-                    if (admin.Password != PwdEncryption.Encryption(password, admin.CreateAt))
+                    if (PasswordErrorCount(admin.ID) > 5)
                     {
-                        int error = PasswordErrorCount(admin.ID);
-                        if (error > 5)
-                        {
-                            throw new MessageException("密码错误超过5次，账号已被锁定，请联系超级管理员");
-                        }
-                        else
-                        {
-                            throw new MessageException("密码错误");
-                        }
+                        admin.Status = UserStatus.Lock;
+                        db.Update(admin, c => c.ID == admin.ID, c => c.Status);
+                        throw new MessageException($"密码错误超过：5次，账号已锁定，请联系管理员");
                     }
-                    admin.LoginAt = DateTime.Now.GetTimestamp();
-                    db.Update(admin, c => c.ID == admin.ID, c => c.LoginAt);
-                    var claims = new[] {
-                                       new Claim(nameof(admin.ID), admin.ID.ToString()),
-                                      };
-                    token = JWTHelper.CreateToken(_options, claims);
-                    _adminCaching.SaveAdminInfo(admin);
-                    _adminCaching.SaveAdminToken(admin.ID, token);
+                    throw new MessageException("密码错误");
                 }
+                admin.LoginAt = WebAgent.GetTimestamps();
+                admin.LoginIP = IPHelper.IP;
+                token = _adminCaching.Login(admin.ID);
+                db.Update(admin, c => c.ID == admin.ID, c => c.LoginIP, c => c.LoginAt);
+                db.Collback(() =>
+                {
+                    _adminCaching.SaveAdminInfo(admin);
+                });
+                db.Commit();
             }
-            return Logger.Log($"登录成功");
+            return Logger.Log($"登录成功/{username}", admin.ID);
         }
 
-        public bool CreateAdminInfo(AdminInput input, out string password)
+        public bool CreateAdminInfo(string adminname, int roleId, out string password)
         {
-            if (!CheckHelper.CheckUserName(input.AdminName, out string msg))
-                throw new MessageException(msg);
+            if (!CheckHelper.CheckUserName(adminname, out string message)) throw new MessageException(message);
             using (IDapperDatabase db = CreateDatabase())
             {
-                long timestamp = DateTime.Now.GetTimestamp();
+                long timestamp = WebAgent.GetTimestamps();
                 password = PwdEncryption.RandomPassword();
                 string encryption = MD5Encryption.Encryption(password);
                 db.Insert(new Admin()
                 {
-                    AdminName = input.AdminName,
+                    AdminName = adminname,
                     CreateAt = timestamp,
                     Password = PwdEncryption.Encryption(encryption, timestamp),
-                    NickName = input.NickName,
+                    NickName = adminname,
                     Status = UserStatus.Normal
                 });
             }
             return Logger.Log($"保存管理员信息");
         }
 
-        public bool UpdateAdminInfo(AdminInput input)
+        public bool UpdateAdminInfo(string nickname, int roleId, UserStatus status)
         {
             throw new NotImplementedException();
         }

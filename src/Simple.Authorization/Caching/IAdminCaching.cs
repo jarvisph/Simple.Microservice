@@ -1,7 +1,7 @@
-﻿using Simple.Authorization.Entity.Model.Admin;
+﻿using Simple.Authorization.Entity;
 using Simple.Core.Dependency;
 
-namespace Simple.Authorization.Application.Caching
+namespace Simple.Authorization.Caching
 {
     /// <summary>
     /// 管理员缓存相关#0
@@ -14,6 +14,12 @@ namespace Simple.Authorization.Application.Caching
         /// <param name="roleId">角色ID</param>
         /// <returns></returns>
         IEnumerable<string> GetPermission(int roleId);
+        /// <summary>
+        /// 登录
+        /// </summary>
+        /// <param name="adminId"></param>
+        /// <returns></returns>
+        string Login(int adminId);
         /// <summary>
         /// 保存角色权限
         /// </summary>
@@ -36,13 +42,13 @@ namespace Simple.Authorization.Application.Caching
         /// 保存管理员信息
         /// </summary>
         /// <param name="admin"></param>
-        void SaveAdminInfo(AdminRedis admin);
+        void SaveAdminInfo(Admin admin);
         /// <summary>
         /// 获取管理员信息
         /// </summary>
         /// <param name="adminId"></param>
         /// <returns></returns>
-        AdminRedis GetAdminInfo(int adminId);
+        Admin GetAdminInfo(int adminId);
         /// <summary>
         /// 保存管理员token
         /// </summary>
@@ -56,6 +62,12 @@ namespace Simple.Authorization.Application.Caching
         /// <param name="token"></param>
         /// <returns></returns>
         bool CheckToken(int adminId, string token);
+        /// <summary>
+        /// 根据token获取id
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        int GetTokenID(string token);
         /// <summary>
         /// 移除token
         /// </summary>

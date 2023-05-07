@@ -1,7 +1,7 @@
-﻿using Simple.Authorization.Entity.Model.Admin;
-using Simple.Core.Dependency;
+﻿using Simple.Core.Dependency;
+using Simple.Core.Domain.Enums;
 
-namespace Simple.Authorization.Application.Services
+namespace Simple.Authorization.Interface
 {
     public interface IAdminAppService : ISingletonDependency
     {
@@ -16,16 +16,16 @@ namespace Simple.Authorization.Application.Services
         /// <summary>
         /// 创建管理员
         /// </summary>
-        /// <param name="input"></param>
+        /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        bool CreateAdminInfo(AdminInput input, out string password);
+        bool CreateAdminInfo(string username, int roleId, out string password);
         /// <summary>
         /// 修改管理员信息
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        bool UpdateAdminInfo(AdminInput input);
+        bool UpdateAdminInfo(string nickname, int roleId, UserStatus status);
         /// <summary>
         /// 删除管理员
         /// </summary>

@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -13,8 +12,26 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Compile Update="Table\admin.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>admin.sql</DependentUpon>
+    </Compile>
+    <Compile Update="Table\role.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>role.sql</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Table\admin.sql">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>admin.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="Table\role.sql">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>role.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
 

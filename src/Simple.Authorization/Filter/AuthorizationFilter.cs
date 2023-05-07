@@ -1,27 +1,26 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Simple.Authorization.Application.Auth;
-using Simple.Authorization.Application.Caching;
-using Simple.Authorization.Entity.Model.Admin;
+using Simple.Authorization.Auth;
+using Simple.Authorization.Caching;
+using Simple.Authorization.Entity;
+using Simple.Authorization.Model;
 using Simple.Core.Authorization;
 using Simple.Core.Extensions;
 using Simple.Web.Jwt;
 using Simple.Web.Mvc;
 using System.Reflection;
 
-namespace Simple.Authorization.Application.Filter
+namespace Simple.Authorization.Filter
 {
     /// <summary>
     /// 权限过滤器
     /// </summary>
     public class AuthorizationFilter : ActionFilterAttribute
     {
-        private readonly JWTOption _options;
-        private readonly IAdminCaching _adminCaching;
-        public AuthorizationFilter(JWTOption options, IAdminCaching adminCaching)
+        private readonly IAdminCaching _adminAppCache;
+        public AuthorizationFilter(IAdminCaching adminCaching)
         {
-            _options = options;
-            _adminCaching = adminCaching;
+            _adminAppCache = adminCaching;
         }
         public override void OnActionExecuted(ActionExecutedContext context)
         {
@@ -36,24 +35,29 @@ namespace Simple.Authorization.Application.Filter
             }
             else
             {
-                string token = context.HttpContext.GetHeader(_options.TokenName);
+                string token = context.HttpContext.GetHeader("TOKEN");
                 if (string.IsNullOrWhiteSpace(token)) throw new AuthorizationException();
-                int adminId = context.HttpContext.GetClaimValue("ID").GetValue<int>();
+                int adminId = _adminAppCache.GetTokenID(token);
                 if (adminId == 0) throw new AuthorizationException();
-                if (!_adminCaching.CheckToken(adminId, token)) throw new AuthorizationException();
-                AdminRedis admin = _adminCaching.GetAdminInfo(adminId);
+                var admin = _adminAppCache.GetAdminInfo(adminId);
                 if (admin == null) throw new AuthorizationException();
                 if (!admin.IsAdmin)
                 {
                     PermissionAttribute permission = action.GetAttribute<PermissionAttribute>();
                     if (permission != null)
                     {
-                        if (!_adminCaching.CheckPermission(admin.RoleID, permission.Permission))
+                        if (!_adminAppCache.CheckPermission(admin.RoleID, permission.Permission))
                         {
                             throw new AuthorizationException(PermissionFinder.GetDescription(typeof(PermissionNames), permission.Permission));
                         }
                     }
                 }
+                context.HttpContext.SetItem(new AccountModel
+                {
+                    AccountID = adminId,
+                    AccountName = admin.AdminName,
+                    Type = OperateType.Admin
+                });
                 base.OnActionExecuting(context);
             }
         }

@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Simple.Authorization.Entity.Model.Role;
+﻿using Simple.Authorization.Entity;
 using Simple.Core.Dependency;
 
-namespace Simple.Authorization.Application.Services
+namespace Simple.Authorization.Interface
 {
     public interface IRoleAppService : ISingletonDependency
     {
         /// <summary>
         /// 保存角色信息
         /// </summary>
-        /// <param name="input"></param>
+        /// <param name="role"></param>
         /// <returns></returns>
-        bool SaveRoleInfo(RoleInput input);
+        bool SaveRoleInfo(Role role);
         /// <summary>
         /// 删除角色信息
         /// </summary>

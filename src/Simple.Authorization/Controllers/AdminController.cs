@@ -1,14 +1,17 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Simple.Authorization.Auth;
+using Simple.Authorization.Entity;
+using Simple.Authorization.Interface;
+using Simple.Core.Authorization;
+using Simple.Core.Domain.Enums;
 using Simple.Core.Extensions;
-using Simple.Web.Mvc;
-using Simple.Authorization.Application.Services;
-using Simple.Authorization.Entity.Model.Admin;
-using Simple.Authorization.Entity.DB;
 
 namespace Simple.Authorization.Controllers
 {
-    public class AdminController : AuthorizationControllerBase
+    /// <summary>
+    /// 管理员相关
+    /// </summary>
+    public class AdminController : AuthControllerBase
     {
         private readonly IAdminAppService _adminAppService;
         public AdminController(IAdminAppService adminAppService)
@@ -19,10 +22,10 @@ namespace Simple.Authorization.Controllers
         /// 管理员列表
         /// </summary>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPost, Permission(PermissionNames.Authorization_Admin)]
         public ActionResult List([FromForm] string? adminname, [FromForm] string? nickname)
         {
-            var query = DB.Admin.Where(adminname, c => c.AdminName == adminname)
+            var query = ADB.Admin.Where(adminname, c => c.AdminName == adminname)
                                 .Where(nickname, c => c.NickName == nickname);
             return PageResult(query.OrderByDescending(c => c.CreateAt), c => new
             {
@@ -41,21 +44,20 @@ namespace Simple.Authorization.Controllers
         /// <summary>
         /// 保存管理员信息
         /// </summary>
-        /// <param name="input"></param>
         /// <returns></returns>
-        [HttpPost]
-        public ActionResult Save([FromModel] AdminInput input)
+        [HttpPost, Permission(PermissionNames.Authorization_Admin)]
+        public ActionResult Save([FromForm] int id, [FromForm] string username, [FromForm] string nickname, [FromForm] int roleId, [FromForm] UserStatus status)
         {
-            if (input.ID == 0)
+            if (id == 0)
             {
-                return JsonResult(_adminAppService.CreateAdminInfo(input, out string password), new
+                return JsonResult(_adminAppService.CreateAdminInfo(username, roleId, out string password), new
                 {
                     Password = password
                 });
             }
             else
             {
-                return JsonResult(_adminAppService.UpdateAdminInfo(input));
+                return JsonResult(_adminAppService.UpdateAdminInfo(nickname, roleId, status));
             }
         }
         /// <summary>
@@ -63,10 +65,10 @@ namespace Simple.Authorization.Controllers
         /// </summary>
         /// <param name="adminId"></param>
         /// <returns></returns>
-        [HttpGet]
+        [HttpPost, Permission(PermissionNames.Authorization_Admin)]
         public ActionResult Info([FromForm] int adminId)
         {
-            Admin admin = DB.Admin.FirstOrDefault(c => c.ID == adminId, new Admin());
+            Admin admin = ADB.Admin.FirstOrDefault(c => c.ID == adminId, new Admin());
             return JsonResult(new
             {
                 admin.ID,
@@ -80,7 +82,7 @@ namespace Simple.Authorization.Controllers
         /// </summary>
         /// <param name="adminId"></param>
         /// <returns></returns>
-        [HttpDelete]
+        [HttpPost, Permission(PermissionNames.Authorization_Admin)]
         public ActionResult Delete([FromForm] int adminId)
         {
             return JsonResult(_adminAppService.DeleteAdminInfo(adminId));
@@ -90,7 +92,7 @@ namespace Simple.Authorization.Controllers
         /// </summary>
         /// <param name="adminId"></param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPost, Permission(PermissionNames.Authorization_Admin)]
         public ActionResult ResetPassword([FromForm] int adminId)
         {
             return JsonResult(_adminAppService.ResetPassword(adminId, out string password), new
