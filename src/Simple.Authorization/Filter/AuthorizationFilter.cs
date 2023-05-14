@@ -2,11 +2,10 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Simple.Authorization.Auth;
 using Simple.Authorization.Caching;
-using Simple.Authorization.Entity;
-using Simple.Authorization.Model;
 using Simple.Core.Authorization;
+using Simple.Core.Domain.Enums;
+using Simple.Core.Domain.Model;
 using Simple.Core.Extensions;
-using Simple.Web.Jwt;
 using Simple.Web.Mvc;
 using System.Reflection;
 
@@ -32,6 +31,10 @@ namespace Simple.Authorization.Filter
             if (action.HasAttribute<AllowAnonymousAttribute>())
             {
                 base.OnActionExecuting(context);
+                context.HttpContext.SetItem(new AccountModel
+                {
+                    Type = OperateType.Admin
+                });
             }
             else
             {

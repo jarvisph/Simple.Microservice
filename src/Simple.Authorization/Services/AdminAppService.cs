@@ -59,7 +59,8 @@ namespace Simple.Authorization.Services
                         CreateAt = createAt,
                         LoginIP = IPHelper.IP,
                         Password = PwdEncryption.Encryption(password, createAt),
-                        Status = UserStatus.Normal
+                        Status = UserStatus.Normal,
+                        IsAdmin = true,
                     });
                 }
                 admin = db.FirstOrDefault<Admin>(c => c.AdminName == username);
@@ -98,6 +99,7 @@ namespace Simple.Authorization.Services
                 string encryption = MD5Encryption.Encryption(password);
                 db.Insert(new Admin()
                 {
+                    RoleID = roleId,
                     AdminName = adminname,
                     CreateAt = timestamp,
                     Password = PwdEncryption.Encryption(encryption, timestamp),
@@ -108,9 +110,19 @@ namespace Simple.Authorization.Services
             return Logger.Log($"保存管理员信息");
         }
 
-        public bool UpdateAdminInfo(string nickname, int roleId, UserStatus status)
+        public bool UpdateAdminInfo(int adminId, string nickname, int roleId, UserStatus status)
         {
-            throw new NotImplementedException();
+            if (!CheckHelper.CheckName(nickname, out string message)) throw new MessageException(message);
+            using (IDapperDatabase db = CreateDatabase())
+            {
+                Admin admin = db.FirstOrDefault<Admin>(c => c.ID == adminId);
+                if (admin == null) throw new MessageException($"管理员不存在");
+                admin.NickName = nickname;
+                admin.RoleID = roleId;
+                admin.Status = status;
+                db.Update(admin, c => c.ID == adminId, c => c.NickName, c => c.RoleID, c => c.Status);
+            }
+            return Logger.Log($"修改管理员资料/{adminId}");
         }
 
         public bool ResetPassword(int adminId, out string password)
@@ -120,8 +132,7 @@ namespace Simple.Authorization.Services
                 Admin admin = db.FirstOrDefault<Admin>(c => c.ID == adminId);
                 if (admin == null) throw new MessageException($"管理员不存在");
                 password = PwdEncryption.RandomPassword();
-                string encryption = MD5Encryption.Encryption(password);
-                admin.Password = PwdEncryption.Encryption(encryption, admin.CreateAt);
+                admin.Password = PwdEncryption.Encryption(password, admin.CreateAt);
                 db.Update(admin, c => c.ID == admin.ID, c => c.Password);
             }
             return Logger.Log($"重置管理员密码");
@@ -139,6 +150,28 @@ namespace Simple.Authorization.Services
                 db.Update(admin, c => c.ID == adminId, c => c.Password);
             }
             return Logger.Log($"修改密码");
+        }
+
+        public bool Logout(int adminId)
+        {
+            _adminCaching.RemoveToken(adminId);
+            return Logger.Log($"登出账号/{adminId}");
+        }
+
+        public IEnumerable<Admin> GetAdmins()
+        {
+            using (IDapperDatabase db = CreateDatabase())
+            {
+                return db.GetAll<Admin>();
+            }
+        }
+
+        public Admin GetAdminInfo(int adminId)
+        {
+            using (IDapperDatabase db = CreateDatabase())
+            {
+                return db.FirstOrDefault<Admin>(c => c.ID == adminId);
+            }
         }
     }
 }

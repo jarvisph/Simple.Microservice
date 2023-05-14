@@ -29,6 +29,14 @@ namespace Simple.Authorization.Services
             return Logger.Log($"角色授权");
         }
 
+        public IEnumerable<Role> GetRoles()
+        {
+            using (IDapperDatabase db = CreateDatabase())
+            {
+                return db.GetAll<Role>(c => c.ID != 0).ToList();
+            }
+        }
+
         public bool DeleteRoleInfo(int roleId)
         {
             using (IDapperDatabase db = CreateDatabase())
@@ -62,6 +70,14 @@ namespace Simple.Authorization.Services
                 db.Commit();
             }
             return Logger.Log($"保存角色信息/{role.ID}");
+        }
+
+        public Role GetRoleInfo(int roleId)
+        {
+            using (IDapperDatabase db = CreateDatabase())
+            {
+                return db.FirstOrDefault<Role>(c => c.ID == roleId);
+            }
         }
     }
 }

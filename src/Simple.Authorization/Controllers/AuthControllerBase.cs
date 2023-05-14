@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Simple.Authorization.DBContext;
-using Simple.Authorization.Model;
-using Simple.Core.Dependency;
+using Microsoft.EntityFrameworkCore;
+using Simple.Core.Domain.Model;
 using Simple.Core.Extensions;
+using Simple.Core.Localization;
 using Simple.Web.Mvc;
 
 namespace Simple.Authorization.Controllers
@@ -13,12 +13,10 @@ namespace Simple.Authorization.Controllers
     [Route("auth/[controller]/[action]")]
     public abstract class AuthControllerBase : SimpleControllerBase
     {
-        public AuthControllerBase()
+        public DbContextOptions DbContextOptions()
         {
-            this.ADB = IocCollection.Resolve<AuthDbContext>();
+            return new DbContextOptionsBuilder().UseSqlServer(AppsettingConfig.GetConnectionString("DBConnection")).Options;
         }
-        public AuthDbContext ADB { get; private set; }
-
         public AccountModel Account => HttpContext.GetItem<AccountModel>();
     }
 }

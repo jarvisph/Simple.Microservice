@@ -5,7 +5,7 @@ namespace Simple.Authorization.Services
 {
     public abstract class ServiceBase : AppServiceBase
     {
-        protected ServiceBase() : base(AppsettingConfig.GetConnectionString("DbConnection"))
+        protected ServiceBase() : base(AppsettingConfig.GetConnectionString("DBConnection"))
         {
 
         }

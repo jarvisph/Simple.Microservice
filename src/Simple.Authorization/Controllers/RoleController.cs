@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Simple.Authorization.Auth;
+using Simple.Authorization.DBContext;
 using Simple.Authorization.Entity;
 using Simple.Authorization.Interface;
 using Simple.Core.Authorization;
@@ -24,7 +25,16 @@ namespace Simple.Authorization.Controllers
         [HttpPost, Permission(PermissionNames.Authorization_Role)]
         public ActionResult GetRoles()
         {
-            return JsonResult(ADB.Role.ToList());
+            using (AuthDbContext context = new AuthDbContext(DbContextOptions()))
+            {
+                return PageResult(context.Role.OrderByDescending(c => c.ID), c => new
+                {
+                    c.ID,
+                    c.Name,
+                    c.Description,
+                    c.Permissions,
+                });
+            }
         }
 
         /// <summary>

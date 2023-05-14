@@ -1,4 +1,5 @@
-﻿using Simple.Core.Dependency;
+﻿using Simple.Authorization.Entity;
+using Simple.Core.Dependency;
 using Simple.Core.Domain.Enums;
 
 namespace Simple.Authorization.Interface
@@ -12,7 +13,27 @@ namespace Simple.Authorization.Interface
         /// <param name="password"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public bool Login(string username, string password, long time, string code, out string token);
+        bool Login(string username, string password, long time, string code, out string token);
+
+        /// <summary>
+        /// 管理员列表
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<Admin> GetAdmins();
+
+        /// <summary>
+        /// 获取管理员信息
+        /// </summary>
+        /// <param name="adminId"></param>
+        /// <returns></returns>
+        Admin GetAdminInfo(int adminId);
+
+        /// <summary>
+        /// 登出
+        /// </summary>
+        /// <param name="adminId"></param>
+        /// <returns></returns>
+        bool Logout(int adminId);
         /// <summary>
         /// 创建管理员
         /// </summary>
@@ -23,9 +44,8 @@ namespace Simple.Authorization.Interface
         /// <summary>
         /// 修改管理员信息
         /// </summary>
-        /// <param name="input"></param>
         /// <returns></returns>
-        bool UpdateAdminInfo(string nickname, int roleId, UserStatus status);
+        bool UpdateAdminInfo(int adminId, string nickname, int roleId, UserStatus status);
         /// <summary>
         /// 删除管理员
         /// </summary>

@@ -24,5 +24,16 @@ namespace Simple.Authorization.Interface
         /// <param name="permssions"></param>
         /// <returns></returns>
         bool Authorize(int roleId, string[] permssions);
+        /// <summary>
+        /// 获取所有角色
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<Role> GetRoles();
+        /// <summary>
+        /// 获取角色信息
+        /// </summary>
+        /// <param name="roleId"></param>
+        /// <returns></returns>
+        Role GetRoleInfo(int roleId);
     }
 }
