@@ -9,17 +9,19 @@ using Simple.Core.Extensions;
 using Simple.Core.Encryption;
 using Simple.Core.Helper;
 using Newtonsoft.Json;
+using Simple.Core.Domain;
 
 namespace Simple.Utils.Job
 {
     public class DingdingJob : JobServiceBase
     {
-        public override TimeSpan Time => TimeSpan.MinValue;
-        public override int Invoke()
+        public override int Time => throw new NotImplementedException();
+
+        public override void Invoke()
         {
             DingdingQueue.Consumer((msg) =>
             {
-                long timestamp = DateTime.Now.GetTimestamp();
+                long timestamp = WebAgent.GetTimestamps();
                 string message = $"{timestamp}\n{msg.Secret}";
                 string sign = SHA256Encryption.HMACSHA256(message, msg.Secret);
                 string api = $"https://oapi.dingtalk.com/robot/send?access_token={msg.Access_Token}&timestamp={timestamp}&sign={sign}";
@@ -79,7 +81,6 @@ namespace Simple.Utils.Job
                     Console.WriteLine($"[{DateTime.Now}]发送错误 \n {ex.Message} \n {response}");
                 }
             });
-            return -1;
         }
     }
 }

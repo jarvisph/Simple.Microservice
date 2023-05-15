@@ -15,16 +15,16 @@ namespace Simple.Utils.Consumers
     {
         public override int Time => throw new NotImplementedException();
 
-        public override int Invoke()
+        public override void Invoke()
         {
             TelegramQueue.Consumer(message =>
             {
-                string api = "https://api.telegram.org/bot" + message.Token;
+                string url = $"https://api.telegram.org/{message.Token}/sendMessage";
                 string json = JsonConvert.SerializeObject(new { chat_id = message.ChatID, text = message.Message, parse_mode = "HTML" });
                 string response = string.Empty;
                 try
                 {
-                    response = NetHelper.Post(api, json, new Dictionary<string, string> { });
+                    response = NetHelper.Post(url, json, new Dictionary<string, string> { });
                     JObject info = JObject.Parse(response);
                     bool success = info["ok"]?.Value<bool>() ?? false;
                     Console.WriteLine($"[{DateTime.Now}]推送状态：{success}");
@@ -34,7 +34,6 @@ namespace Simple.Utils.Consumers
                     ConsoleHelper.WriteLine($"[{DateTime.Now}]发送失败\n{response ?? ex.Message}", ConsoleColor.Red);
                 }
             });
-            return -0;
         }
     }
 }
