@@ -2,38 +2,36 @@
 using Newtonsoft.Json.Linq;
 using Simple.Core.Helper;
 using Simple.Core.Jobs;
+using Simple.Utils.Domain.Model;
 using Simple.Utils.Domain.Queues;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Simple.Utils.Consumers
 {
     public class TelegramJob : JobServiceBase
     {
-        public override int Time => throw new NotImplementedException();
+        public override int Time => 1000;
 
         public override void Invoke()
         {
-            TelegramQueue.Consumer(message =>
+            if (TelegramQueue.Queue.Count > 0)
             {
+                TelegramModel message = TelegramQueue.Queue.Dequeue();
+                Console.WriteLine(JsonConvert.SerializeObject(message));
                 string url = $"https://api.telegram.org/{message.Token}/sendMessage";
                 string json = JsonConvert.SerializeObject(new { chat_id = message.ChatID, text = message.Message, parse_mode = "HTML" });
-                string response = string.Empty;
                 try
                 {
-                    response = NetHelper.Post(url, json, new Dictionary<string, string> { });
+                    string response = NetHelper.Post(url, json, new Dictionary<string, string> { });
                     JObject info = JObject.Parse(response);
                     bool success = info["ok"]?.Value<bool>() ?? false;
                     Console.WriteLine($"[{DateTime.Now}]推送状态：{success}");
                 }
                 catch (Exception ex)
                 {
-                    ConsoleHelper.WriteLine($"[{DateTime.Now}]发送失败\n{response ?? ex.Message}", ConsoleColor.Red);
+                    ConsoleHelper.WriteLine($"[{DateTime.Now}]发送失败\n{ex.Message}", ConsoleColor.Red);
                 }
-            });
+            }
+
         }
     }
 }

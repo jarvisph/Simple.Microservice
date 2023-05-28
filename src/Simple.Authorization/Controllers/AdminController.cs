@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Simple.Authorization.Auth;
 using Simple.Authorization.DBContext;
 using Simple.Authorization.Entity;
@@ -7,7 +6,6 @@ using Simple.Authorization.Interface;
 using Simple.Core.Authorization;
 using Simple.Core.Domain.Enums;
 using Simple.Core.Extensions;
-using Simple.Core.Localization;
 
 namespace Simple.Authorization.Controllers
 {
