@@ -2,11 +2,6 @@
 using Simple.Utils.Domain.Model;
 using Simple.Utils.Domain.Queues;
 using Simple.Web.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Simple.Utils.Controllers
 {
@@ -16,9 +11,15 @@ namespace Simple.Utils.Controllers
     [Route("[controller]/[action]")]
     public class DingdingController : SimpleControllerBase
     {
-        public ActionResult Send(DingdingModel model)
+        public ActionResult Send([FromForm] string content, [FromForm] string title, [FromForm] string token, [FromForm] string secret)
         {
-            DingdingQueue.Send(model);
+            DingdingQueue.Send(new DingdingModel()
+            {
+                Access_Token = token,
+                Secret = secret,
+                Text = content,
+                Title = title,
+            });
             return Ok("success");
         }
     }

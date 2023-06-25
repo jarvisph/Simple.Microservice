@@ -16,7 +16,6 @@ namespace Simple.Utils.Consumers
             if (TelegramQueue.Queue.Count > 0)
             {
                 TelegramModel message = TelegramQueue.Queue.Dequeue();
-                Console.WriteLine(JsonConvert.SerializeObject(message));
                 string url = $"https://api.telegram.org/{message.Token}/sendMessage";
                 string json = JsonConvert.SerializeObject(new { chat_id = message.ChatID, text = message.Message, parse_mode = "HTML" });
                 try

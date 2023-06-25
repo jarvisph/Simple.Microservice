@@ -113,7 +113,7 @@ namespace Simple.Authorization.Services
         public bool UpdateAdminInfo(int adminId, string nickname, int roleId, UserStatus status)
         {
             if (!CheckHelper.CheckName(nickname, out string message)) throw new MessageException(message);
-            using (IDapperDatabase db = CreateDatabase())
+            using (IDapperDatabase db = CreateDatabase(IsolationLevel.ReadUncommitted))
             {
                 Admin admin = db.FirstOrDefault<Admin>(c => c.ID == adminId);
                 if (admin == null) throw new MessageException($"管理员不存在");
@@ -121,6 +121,11 @@ namespace Simple.Authorization.Services
                 admin.RoleID = roleId;
                 admin.Status = status;
                 db.Update(admin, c => c.ID == adminId, c => c.NickName, c => c.RoleID, c => c.Status);
+                db.Collback(() =>
+                {
+                    _adminCaching.SaveAdminInfo(admin);
+                });
+                db.Commit();
             }
             return Logger.Log($"修改管理员资料/{adminId}");
         }
@@ -162,7 +167,7 @@ namespace Simple.Authorization.Services
         {
             using (IDapperDatabase db = CreateDatabase())
             {
-                return db.GetAll<Admin>();
+                return db.GetAll<Admin>().ToList();
             }
         }
 

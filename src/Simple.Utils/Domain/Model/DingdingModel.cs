@@ -22,7 +22,7 @@ namespace Simple.Utils.Domain.Model
         /// 消息类型
         /// text\link\markdown\actionCard\feedCard
         /// </summary>
-        public string MsgType { get; set; } = string.Empty;
+        public string MsgType { get; set; } = "text";
         /// <summary>
         /// 文本
         /// </summary>
