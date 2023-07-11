@@ -16,7 +16,7 @@ namespace Simple.Utils.Controllers
         [Route("[controller]"), HttpGet]
         public FileContentResult Get([FromQuery] string content)
         {
-            if (CheckHelper.IsChinese(content))
+            if (CheckHelper.IsChinese(content, out _))
             {
                 if (content.Length > 2)
                 {

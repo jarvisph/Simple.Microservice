@@ -15,4 +15,10 @@
     <PackageReference Include="QRCoder" Version="1.4.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="wwwroot\index.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
