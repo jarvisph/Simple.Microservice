@@ -75,5 +75,17 @@ namespace Simple.Authorization.Caching
         /// <returns></returns>
         bool RemoveToken(int adminId);
 
+        /// <summary>
+        /// 检查IP白名单
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <returns></returns>
+        bool CheckWhiteList(string ip);
+        /// <summary>
+        /// 保存IP白名单
+        /// </summary>
+        /// <param name="ip"></param>
+        void SaveWhiteList(IEnumerable<string> ip);
+
     }
 }

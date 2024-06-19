@@ -6,6 +6,8 @@ using Simple.Core.Authorization;
 using Simple.Core.Domain.Enums;
 using Simple.Core.Domain.Model;
 using Simple.Core.Extensions;
+using Simple.Core.Helper;
+using Simple.Core.Logger;
 using Simple.Web.Mvc;
 using System.Reflection;
 
@@ -27,6 +29,7 @@ namespace Simple.Authorization.Filter
         }
         public override void OnActionExecuting(ActionExecutingContext context)
         {
+            //if (!_adminAppCache.CheckWhiteList(IPHelper.IP)) throw new MessageException("当前IP禁止访问，请联系管理员");
             MethodInfo action = context.GetActionMethodInfo();
             if (action.HasAttribute<AllowAnonymousAttribute>())
             {
@@ -43,7 +46,7 @@ namespace Simple.Authorization.Filter
                 int adminId = _adminAppCache.GetTokenID(token);
                 if (adminId == 0) throw new AuthorizationException();
                 var admin = _adminAppCache.GetAdminInfo(adminId);
-                if (admin == null) throw new AuthorizationException();
+                if (admin == null || admin.Status != UserStatus.Normal) throw new AuthorizationException();
                 if (!admin.IsAdmin)
                 {
                     PermissionAttribute permission = action.GetAttribute<PermissionAttribute>();
@@ -59,6 +62,7 @@ namespace Simple.Authorization.Filter
                 {
                     AccountID = adminId,
                     AccountName = admin.AdminName,
+                    RoleID = admin.RoleID,
                     Type = OperateType.Admin
                 });
                 base.OnActionExecuting(context);

@@ -20,6 +20,10 @@ namespace Simple.Authorization.Caching
         /// 管理员token
         /// </summary>
         private const string ADMIN_TOKEN = "ADMIN_TOKEN";
+        /// <summary>
+        /// IP白名单
+        /// </summary>
+        private const string ADMIN_WHITELIST = "ADMIN_WHITELIST";
 
         public IEnumerable<string> GetPermission(int roleId)
         {
@@ -80,5 +84,21 @@ namespace Simple.Authorization.Caching
         }
 
         string IAdminCaching.Login(int adminId) => base.Login(adminId);
+
+        public bool CheckWhiteList(string ip)
+        {
+            return this.Redis.SetContains(ADMIN_WHITELIST, ip);
+        }
+
+        public void SaveWhiteList(IEnumerable<string> ips)
+        {
+            IBatch batch = Redis.CreateBatch();
+            batch.KeyDeleteAsync(ADMIN_WHITELIST);
+            foreach (var ip in ips)
+            {
+                batch.SetAddAsync(ADMIN_WHITELIST, ip);
+            }
+            batch.Execute();
+        }
     }
 }

@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Simple.Chain\Simple.Chain.csproj" />
     <ProjectReference Include="..\..\..\Simple.dotNet\src\Simple.dotNet.Web\Simple.dotNet.Web.csproj" />
   </ItemGroup>
 

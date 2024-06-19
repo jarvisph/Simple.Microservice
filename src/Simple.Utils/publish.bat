@@ -7,6 +7,7 @@ del Dockerfile
 echo FROM mcr.microsoft.com/dotnet/aspnet:6.0  >> Dockerfile
 echo WORKDIR /app  >> Dockerfile
 echo COPY . .  >> Dockerfile
+echo RUN ln -s /lib/x86_64-linux-gnu/libdl-2.31.so /usr/lib/libdl.so >> Dockerfile
 echo ENTRYPOINT ["dotnet", "%NAME%.dll"] >> Dockerfile
 docker rmi %ACR%/simplehub/%IMAGES%
 docker rmi %IMAGES%
